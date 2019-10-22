@@ -1,6 +1,6 @@
 use ggez;
-use ggez::audio;
-use ggez::audio::SoundSource;
+//use ggez::audio;
+//use ggez::audio::SoundSource;
 use ggez::conf;
 use ggez::event::{self, EventHandler, KeyCode, KeyMods};
 use ggez::graphics;
@@ -15,31 +15,28 @@ use std::path;
 type Point2 = na::Point2<f32>;
 type Vector2 = na::Vector2<f32>;
 
-/// Create a unit vector representing the
-/// given angle (in radians)
 fn vec_from_angle(angle: f32) -> Vector2 {
     let vx = angle.sin();
     let vy = angle.cos();
     Vector2::new(vx, vy)
 }
 
-/// Makes a random `Vector2` with the given max magnitude.
 fn random_vec(max_magnitude: f32) -> Vector2 {
     let angle = rand::random::<f32>() * 2.0 * std::f32::consts::PI;
     let mag = rand::random::<f32>() * max_magnitude;
     vec_from_angle(angle) * (mag)
 }
 
-
-/// Translates the world coordinate system, which
-/// has Y pointing up and the origin at the center,
-/// to the screen coordinate system, which has Y
-/// pointing downward and the origin at the top-left,
 fn world_to_screen_coords(screen_width: f32, screen_height: f32, point: Point2) -> Point2 {
     let x = point.x + screen_width / 2.0;
     let y = screen_height - (point.y + screen_height / 2.0);
     Point2::new(x, y)
 }
+
+
+const CRAB_H: f32 = 150.0;
+const CRAB_W: f32 = 100.0;
+const CRAB_S: f32 = 1.5;
 
 
 struct Body {
@@ -50,10 +47,10 @@ struct Body {
 }
 
 impl Body  {
-    fn new(x:f32, y:f32) -> Body {
+    fn new(x:f32, y:f32, v: Vector2) -> Body {
         let b = Body {
             location: Point2::new(x, y),
-            velocity: na::zero(),
+            velocity: v,
             heading: 0.,
             avelocity: 0.
         };
@@ -68,7 +65,7 @@ struct Claw {
 impl Claw {
     fn new(x:f32, y:f32) -> Claw {
         let c = Claw {
-            body: Body::new(x, y)
+            body: Body::new(x, y, na::zero())
         };
         c
     }
@@ -76,6 +73,9 @@ impl Claw {
 
 struct Crab {
     body: Body,
+    w: f32,
+    h: f32,
+    s: f32,
     claw1: Claw,
     claw2: Claw
 }
@@ -83,11 +83,34 @@ struct Crab {
 impl Crab {
     fn new(x:f32, y:f32) -> Crab {
         let c = Crab {
-            body: Body::new(x, y),
+            body: Body::new(x, y, Vector2::new(CRAB_S, 0.0)),
+            w: CRAB_W,
+            h: CRAB_H,
+            s: CRAB_S,
             claw1: Claw::new(0.0, 0.0),
             claw2: Claw::new(0.0, 0.0 )
         };
         c
+    }
+
+    fn update(&mut self, max_screen: f32) -> GameResult {
+        self.body.location.x += self.body.velocity.x;
+
+        if (self.body.location.x + (self.w * 2.) >= max_screen) {
+            self.body.velocity.x = - self.s;
+        } else if (self.body.location.x < self.w) {
+            self.body.velocity.x = self.s;
+        }
+
+        Ok(())
+    }
+
+    fn draw(&self, img: &graphics::Image, ctx: &mut Context) -> GameResult {
+        let drawparams = graphics::DrawParam::new()
+            .dest(self.body.location)
+            .scale(Vector2::new(0.2, 0.2));
+        graphics::draw(ctx, img, drawparams);
+        Ok(())
     }
 }
 
@@ -130,7 +153,8 @@ struct State {
     state: String,
     crab: Crab,
     screen_width: f32,
-    screen_height: f32
+    screen_height: f32,
+    assets: Assets
 }
 
 impl State {
@@ -145,23 +169,31 @@ impl State {
             player1_score: 0,
             player2_score: 0,
             state: String::from("play"),
-            crab: Crab::new(0.0, 0.0),
+            crab: Crab::new(width / 2.0 - (CRAB_W / 2.0), height - CRAB_H),
             screen_width: width,
             screen_height: height,
+            assets: assets
         };
         Ok(s)
     }
-
 }
 
 impl ggez::event::EventHandler for State {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.dt = timer::delta(ctx);
+
+        self.crab.update(self.screen_width);
+
+
         Ok(())
     }
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        graphics::clear(ctx, graphics::BLACK);
-        println!("Hello ggez! dt = {}ns", self.dt.subsec_nanos());
+        graphics::clear(ctx, graphics::WHITE);
+
+        //println!("Hello ggez! dt = {}ns", self.dt.subsec_nanos());
+        self.crab.draw(&self.assets.crab_image, ctx);
+
+        graphics::present(ctx)?;
         Ok(())
     }
 
