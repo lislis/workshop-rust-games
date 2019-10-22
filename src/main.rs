@@ -176,23 +176,8 @@ impl State {
         };
         Ok(s)
     }
-}
 
-impl ggez::event::EventHandler for State {
-    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        self.dt = timer::delta(ctx);
-
-        self.crab.update(self.screen_width);
-
-
-        Ok(())
-    }
-    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        graphics::clear(ctx, graphics::WHITE);
-
-        //println!("Hello ggez! dt = {}ns", self.dt.subsec_nanos());
-        self.crab.draw(&self.assets.crab_image, ctx);
-
+    fn render_ui(&self, ctx: &mut Context) -> GameResult {
         let score_1 = graphics::Text::new((format!("Player 1: #{}", self.player1_score),
                                            self.assets.font, 38.0));
         let score_2 = graphics::Text::new((format!("Player 2: #{}", self.player2_score),
@@ -204,6 +189,25 @@ impl ggez::event::EventHandler for State {
                                        0.0,
                                        graphics::BLACK))?;
 
+        Ok(())
+    }
+}
+
+impl ggez::event::EventHandler for State {
+    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        self.dt = timer::delta(ctx);
+
+        self.crab.update(self.screen_width);
+
+        Ok(())
+    }
+    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        graphics::clear(ctx, graphics::WHITE);
+
+        //println!("Hello ggez! dt = {}ns", self.dt.subsec_nanos());
+        self.crab.draw(&self.assets.crab_image, ctx)?;
+
+        self.render_ui(ctx)?;
         graphics::present(ctx)?;
         Ok(())
     }
