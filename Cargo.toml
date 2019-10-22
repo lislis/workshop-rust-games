@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 ggez = "0.5"
+nalgebra = {version = "0.18", features = ["mint"] }
+rand = "0.7"
