@@ -96,9 +96,9 @@ impl Crab {
     fn update(&mut self, max_screen: f32) -> GameResult {
         self.body.location.x += self.body.velocity.x;
 
-        if (self.body.location.x + (self.w * 2.) >= max_screen) {
+        if self.body.location.x + (self.w * 2.) >= max_screen {
             self.body.velocity.x = - self.s;
-        } else if (self.body.location.x < self.w) {
+        } else if self.body.location.x < self.w {
             self.body.velocity.x = self.s;
         }
 
@@ -120,7 +120,7 @@ struct Assets {
     crab_image: graphics::Image,
     claw_left: graphics::Image,
     claw_right: graphics::Image,
-    //font: graphics::Font,
+    font: graphics::Font,
     //bg_sound: audio::Source,
     //snap_sound: audio::Source,
 }
@@ -130,14 +130,14 @@ impl Assets {
         let crab_image = graphics::Image::new(ctx, "/crab.png")?;
         let claw_left =  graphics::Image::new(ctx, "/claw_left.png")?;
         let claw_right =  graphics::Image::new(ctx, "/claw_right.png")?;
-        //font =  graphics::Font::new(ctx, "")?;
+        let font =  graphics::Font::new(ctx, "/Airstream.ttf")?;
         //bg_sound =  audio::Source::new(ctx, "")?;
         //snap_sound =  audio::Source::new(ctx, "")?;
         Ok(Assets {
             crab_image,
             claw_left,
             claw_right,
-            //font,
+            font,
             //bg_sound,
             //snap_sound
         })
@@ -192,6 +192,17 @@ impl ggez::event::EventHandler for State {
 
         //println!("Hello ggez! dt = {}ns", self.dt.subsec_nanos());
         self.crab.draw(&self.assets.crab_image, ctx);
+
+        let score_1 = graphics::Text::new((format!("Player 1: #{}", self.player1_score),
+                                           self.assets.font, 38.0));
+        let score_2 = graphics::Text::new((format!("Player 2: #{}", self.player2_score),
+                                           self.assets.font, 38.0));
+        graphics::draw(ctx, &score_1, (Point2::new(10.0, 10.0),
+                                       0.0,
+                                       graphics::BLACK))?;
+        graphics::draw(ctx, &score_2, (Point2::new(self.screen_width - 180.00, 10.0),
+                                       0.0,
+                                       graphics::BLACK))?;
 
         graphics::present(ctx)?;
         Ok(())
