@@ -27,17 +27,13 @@ fn random_vec(max_magnitude: f32) -> Vector2 {
     vec_from_angle(angle) * (mag)
 }
 
-fn world_to_screen_coords(screen_width: f32, screen_height: f32, point: Point2) -> Point2 {
-    let x = point.x + screen_width / 2.0;
-    let y = screen_height - (point.y + screen_height / 2.0);
-    Point2::new(x, y)
-}
-
 
 const CRAB_H: f32 = 150.0;
 const CRAB_W: f32 = 100.0;
 const CRAB_S: f32 = 1.5;
 
+const CLAW_W: f32 = 14.0;
+const CLAW_H: f32 = 50.0;
 
 struct Body {
     location: Point2,
@@ -59,15 +55,50 @@ impl Body  {
 }
 
 struct Claw {
-    body: Body
+    body: Body,
+    body_anchor: Vector2,
+    joint_anchor: Vector2,
+    w: f32,
+    h: f32
 }
 
 impl Claw {
-    fn new(x:f32, y:f32) -> Claw {
+    fn new(loc: Point2, body_anchor: Vector2, joint_anchor: Vector2) -> Claw {
         let c = Claw {
-            body: Body::new(x, y, na::zero())
+            body: Body::new(loc.x, loc.y, na::zero()),
+            body_anchor,
+            joint_anchor,
+            w: CLAW_W,
+            h: CLAW_H
         };
         c
+    }
+
+    fn update(&mut self, parent_loc: Point2) -> GameResult {
+        self.body.location = parent_loc;
+        Ok(())
+    }
+
+    fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult {
+        let b_anchor = Point2::new(self.body.location.x + self.body_anchor.x,
+                                   self.body.location.y + self.body_anchor.y);
+        let j_anchor = Point2::new(self.body.location.x + self.joint_anchor.x,
+                                   self.body.location.y + self.joint_anchor.y);
+        let claw_origin = Point2::new(j_anchor.x - self.w, j_anchor.y - self.h);
+        let arm = graphics::Mesh::new_line(ctx,
+                                           &[b_anchor,
+                                             j_anchor],
+                                           10.,
+                                           graphics::Color::new(1.0, 0.0, 0.0, 1.0))?;
+        graphics::draw(ctx, &arm, graphics::DrawParam::default())?;
+
+        let drawparams = graphics::DrawParam::new()
+            .dest(claw_origin)
+            .rotation(0.0)
+            .scale(Vector2::new(0.2, 0.2));
+        graphics::draw(ctx, img, drawparams)?;
+
+        Ok(())
     }
 }
 
@@ -87,8 +118,12 @@ impl Crab {
             w: CRAB_W,
             h: CRAB_H,
             s: CRAB_S,
-            claw1: Claw::new(0.0, 0.0),
-            claw2: Claw::new(0.0, 0.0 )
+            claw1: Claw::new(Point2::new(x, y),
+                             Vector2::new(CLAW_W, CRAB_H / 2.),
+                             Vector2::new(-30., -20.)),
+            claw2: Claw::new(Point2::new(x, y),
+                             Vector2::new(CRAB_W + 30.0, CRAB_H / 2.),
+                             Vector2::new(170.0, -20.0))
         };
         c
     }
@@ -102,14 +137,19 @@ impl Crab {
             self.body.velocity.x = self.s;
         }
 
+        self.claw1.update(self.body.location)?;
+        self.claw2.update(self.body.location)?;
         Ok(())
     }
 
-    fn draw(&self, img: &graphics::Image, ctx: &mut Context) -> GameResult {
+    fn draw(&self, assets: &Assets, ctx: &mut Context) -> GameResult {
         let drawparams = graphics::DrawParam::new()
             .dest(self.body.location)
             .scale(Vector2::new(0.2, 0.2));
-        graphics::draw(ctx, img, drawparams);
+        graphics::draw(ctx, &assets.crab_image, drawparams)?;
+
+        self.claw1.draw(ctx, &assets.claw_left)?;
+        self.claw2.draw(ctx, &assets.claw_right)?;
         Ok(())
     }
 }
@@ -197,7 +237,7 @@ impl ggez::event::EventHandler for State {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.dt = timer::delta(ctx);
 
-        self.crab.update(self.screen_width);
+        self.crab.update(self.screen_width)?;
 
         Ok(())
     }
@@ -205,8 +245,7 @@ impl ggez::event::EventHandler for State {
         graphics::clear(ctx, graphics::WHITE);
 
         //println!("Hello ggez! dt = {}ns", self.dt.subsec_nanos());
-        self.crab.draw(&self.assets.crab_image, ctx)?;
-
+        self.crab.draw(&self.assets, ctx)?;
         self.render_ui(ctx)?;
         graphics::present(ctx)?;
         Ok(())
@@ -214,7 +253,7 @@ impl ggez::event::EventHandler for State {
 
     fn key_down_event(
         &mut self,
-        ctx: &mut Context,
+        _ctx: &mut Context,
         keycode: KeyCode,
         _keymod: KeyMods,
         _repeat: bool) {
