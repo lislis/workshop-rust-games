@@ -54,6 +54,14 @@ impl Body  {
     }
 }
 
+enum Directions {
+    Up,
+    Down,
+    Left,
+    Right
+}
+
+
 struct Claw {
     body: Body,
     body_anchor: Vector2,
@@ -184,13 +192,16 @@ impl Assets {
     }
 }
 
+enum States {
+    Main,
+}
 
 
 struct State {
     dt: std::time::Duration,
     player1_score: usize,
     player2_score: usize,
-    state: String,
+    state: States,
     crab: Crab,
     screen_width: f32,
     screen_height: f32,
@@ -199,7 +210,11 @@ struct State {
 
 impl State {
     fn new(ctx: &mut Context) -> ggez::GameResult<State> {
-        println!("Game resource path: {:?}", ctx.filesystem);
+        //println!("Game resource path: {:?}", ctx.filesystem);
+        println!("Play Crab!");
+        println!("Player 1, use WASD!");
+        println!("Player 2, use IJKL!");
+        println!("There will be a pause button eventually!");
 
         let assets = Assets::new(ctx)?;
         let (width, height) = ggez::graphics::drawable_size(ctx);
@@ -208,7 +223,7 @@ impl State {
             dt: std::time::Duration::new(0, 0),
             player1_score: 0,
             player2_score: 0,
-            state: String::from("play"),
+            state: States::Main,
             crab: Crab::new(width / 2.0 - (CRAB_W / 2.0), height - CRAB_H),
             screen_width: width,
             screen_height: height,
@@ -233,7 +248,7 @@ impl State {
     }
 }
 
-impl ggez::event::EventHandler for State {
+impl EventHandler for State {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.dt = timer::delta(ctx);
 
@@ -259,7 +274,28 @@ impl ggez::event::EventHandler for State {
         _repeat: bool) {
         match keycode {
             KeyCode::W => {
-                println!("UP")
+                println!("Player 1 UP")
+            },
+            KeyCode::A => {
+                println!("Player 1 Left")
+            },
+            KeyCode::S => {
+                println!("Player 1 Down")
+            },
+            KeyCode::D => {
+                println!("Player 1 Right")
+            },
+            KeyCode::I => {
+                println!("Player 2 Up")
+            },
+            KeyCode::J => {
+                println!("Player 2 Left")
+            },
+            KeyCode::K => {
+                println!("Player 2 Down")
+            },
+            KeyCode::L => {
+                println!("Player 2 Right")
             },
             _ => (),
         }
@@ -267,7 +303,7 @@ impl ggez::event::EventHandler for State {
 }
 
 
-pub fn main() -> ggez::GameResult {
+pub fn main() -> GameResult {
     let resource_dir = if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
         let mut path = path::PathBuf::from(manifest_dir);
         path.push("resources");
