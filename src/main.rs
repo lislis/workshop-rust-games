@@ -27,17 +27,13 @@ fn random_vec(max_magnitude: f32) -> Vector2 {
     vec_from_angle(angle) * (mag)
 }
 
-fn world_to_screen_coords(screen_width: f32, screen_height: f32, point: Point2) -> Point2 {
-    let x = point.x + screen_width / 2.0;
-    let y = screen_height - (point.y + screen_height / 2.0);
-    Point2::new(x, y)
-}
-
 
 const CRAB_H: f32 = 150.0;
 const CRAB_W: f32 = 100.0;
 const CRAB_S: f32 = 1.5;
 
+const CLAW_W: f32 = 14.0;
+const CLAW_H: f32 = 50.0;
 
 struct Body {
     location: Point2,
@@ -58,16 +54,59 @@ impl Body  {
     }
 }
 
+enum Directions {
+    Up,
+    Down,
+    Left,
+    Right
+}
+
+
 struct Claw {
-    body: Body
+    body: Body,
+    body_anchor: Vector2,
+    joint_anchor: Vector2,
+    w: f32,
+    h: f32
 }
 
 impl Claw {
-    fn new(x:f32, y:f32) -> Claw {
+    fn new(loc: Point2, body_anchor: Vector2, joint_anchor: Vector2) -> Claw {
         let c = Claw {
-            body: Body::new(x, y, na::zero())
+            body: Body::new(loc.x, loc.y, na::zero()),
+            body_anchor,
+            joint_anchor,
+            w: CLAW_W,
+            h: CLAW_H
         };
         c
+    }
+
+    fn update(&mut self, parent_loc: Point2) -> GameResult {
+        self.body.location = parent_loc;
+        Ok(())
+    }
+
+    fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult {
+        let b_anchor = Point2::new(self.body.location.x + self.body_anchor.x,
+                                   self.body.location.y + self.body_anchor.y);
+        let j_anchor = Point2::new(self.body.location.x + self.joint_anchor.x,
+                                   self.body.location.y + self.joint_anchor.y);
+        let claw_origin = Point2::new(j_anchor.x - self.w, j_anchor.y - self.h);
+        let arm = graphics::Mesh::new_line(ctx,
+                                           &[b_anchor,
+                                             j_anchor],
+                                           10.,
+                                           graphics::Color::new(1.0, 0.0, 0.0, 1.0))?;
+        graphics::draw(ctx, &arm, graphics::DrawParam::default())?;
+
+        let drawparams = graphics::DrawParam::new()
+            .dest(claw_origin)
+            .rotation(0.0)
+            .scale(Vector2::new(0.2, 0.2));
+        graphics::draw(ctx, img, drawparams)?;
+
+        Ok(())
     }
 }
 
@@ -87,8 +126,12 @@ impl Crab {
             w: CRAB_W,
             h: CRAB_H,
             s: CRAB_S,
-            claw1: Claw::new(0.0, 0.0),
-            claw2: Claw::new(0.0, 0.0 )
+            claw1: Claw::new(Point2::new(x, y),
+                             Vector2::new(CLAW_W, CRAB_H / 2.),
+                             Vector2::new(-30., -20.)),
+            claw2: Claw::new(Point2::new(x, y),
+                             Vector2::new(CRAB_W + 30.0, CRAB_H / 2.),
+                             Vector2::new(170.0, -20.0))
         };
         c
     }
@@ -102,14 +145,19 @@ impl Crab {
             self.body.velocity.x = self.s;
         }
 
+        self.claw1.update(self.body.location)?;
+        self.claw2.update(self.body.location)?;
         Ok(())
     }
 
-    fn draw(&self, img: &graphics::Image, ctx: &mut Context) -> GameResult {
+    fn draw(&self, assets: &Assets, ctx: &mut Context) -> GameResult {
         let drawparams = graphics::DrawParam::new()
             .dest(self.body.location)
             .scale(Vector2::new(0.2, 0.2));
-        graphics::draw(ctx, img, drawparams);
+        graphics::draw(ctx, &assets.crab_image, drawparams)?;
+
+        self.claw1.draw(ctx, &assets.claw_left)?;
+        self.claw2.draw(ctx, &assets.claw_right)?;
         Ok(())
     }
 }
@@ -144,13 +192,16 @@ impl Assets {
     }
 }
 
+enum States {
+    Main,
+}
 
 
 struct State {
     dt: std::time::Duration,
     player1_score: usize,
     player2_score: usize,
-    state: String,
+    state: States,
     crab: Crab,
     screen_width: f32,
     screen_height: f32,
@@ -159,7 +210,11 @@ struct State {
 
 impl State {
     fn new(ctx: &mut Context) -> ggez::GameResult<State> {
-        println!("Game resource path: {:?}", ctx.filesystem);
+        //println!("Game resource path: {:?}", ctx.filesystem);
+        println!("Play Crab!");
+        println!("Player 1, use WASD!");
+        println!("Player 2, use IJKL!");
+        println!("There will be a pause button eventually!");
 
         let assets = Assets::new(ctx)?;
         let (width, height) = ggez::graphics::drawable_size(ctx);
@@ -168,7 +223,7 @@ impl State {
             dt: std::time::Duration::new(0, 0),
             player1_score: 0,
             player2_score: 0,
-            state: String::from("play"),
+            state: States::Main,
             crab: Crab::new(width / 2.0 - (CRAB_W / 2.0), height - CRAB_H),
             screen_width: width,
             screen_height: height,
@@ -176,23 +231,8 @@ impl State {
         };
         Ok(s)
     }
-}
 
-impl ggez::event::EventHandler for State {
-    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        self.dt = timer::delta(ctx);
-
-        self.crab.update(self.screen_width);
-
-
-        Ok(())
-    }
-    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        graphics::clear(ctx, graphics::WHITE);
-
-        //println!("Hello ggez! dt = {}ns", self.dt.subsec_nanos());
-        self.crab.draw(&self.assets.crab_image, ctx);
-
+    fn render_ui(&self, ctx: &mut Context) -> GameResult {
         let score_1 = graphics::Text::new((format!("Player 1: #{}", self.player1_score),
                                            self.assets.font, 38.0));
         let score_2 = graphics::Text::new((format!("Player 2: #{}", self.player2_score),
@@ -204,19 +244,58 @@ impl ggez::event::EventHandler for State {
                                        0.0,
                                        graphics::BLACK))?;
 
+        Ok(())
+    }
+}
+
+impl EventHandler for State {
+    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        self.dt = timer::delta(ctx);
+
+        self.crab.update(self.screen_width)?;
+
+        Ok(())
+    }
+    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        graphics::clear(ctx, graphics::WHITE);
+
+        //println!("Hello ggez! dt = {}ns", self.dt.subsec_nanos());
+        self.crab.draw(&self.assets, ctx)?;
+        self.render_ui(ctx)?;
         graphics::present(ctx)?;
         Ok(())
     }
 
     fn key_down_event(
         &mut self,
-        ctx: &mut Context,
+        _ctx: &mut Context,
         keycode: KeyCode,
         _keymod: KeyMods,
         _repeat: bool) {
         match keycode {
             KeyCode::W => {
-                println!("UP")
+                println!("Player 1 UP")
+            },
+            KeyCode::A => {
+                println!("Player 1 Left")
+            },
+            KeyCode::S => {
+                println!("Player 1 Down")
+            },
+            KeyCode::D => {
+                println!("Player 1 Right")
+            },
+            KeyCode::I => {
+                println!("Player 2 Up")
+            },
+            KeyCode::J => {
+                println!("Player 2 Left")
+            },
+            KeyCode::K => {
+                println!("Player 2 Down")
+            },
+            KeyCode::L => {
+                println!("Player 2 Right")
             },
             _ => (),
         }
@@ -224,7 +303,7 @@ impl ggez::event::EventHandler for State {
 }
 
 
-pub fn main() -> ggez::GameResult {
+pub fn main() -> GameResult {
     let resource_dir = if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
         let mut path = path::PathBuf::from(manifest_dir);
         path.push("resources");
