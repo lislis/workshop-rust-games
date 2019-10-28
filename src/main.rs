@@ -54,12 +54,12 @@ impl Claw {
         Ok(c)
     }
 
-    fn update(&mut self, parent_loc: Point2) -> GameResult {
+    fn update(&mut self, parent_loc: Point2) -> GameResult<&Self> {
         self.location = parent_loc;
-        Ok(())
+        Ok(self)
     }
 
-    fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult {
+    fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
         let b_anchor = Point2::new(self.location.x + self.body_anchor.x,
                                    self.location.y + self.body_anchor.y);
         let j_anchor = Point2::new(self.location.x + self.joint_anchor.x,
@@ -78,7 +78,7 @@ impl Claw {
             .scale(Vector2::new(0.2, 0.2));
         graphics::draw(ctx, img, drawparams)?;
 
-        Ok(())
+        Ok(self)
     }
 
     fn movedir(&mut self, dir:Directions) -> Vector2 {
@@ -115,7 +115,6 @@ impl Crab {
         let c = Crab {
             location,
             velocity: Vector2::new(CRAB_S, 0.0),
-            //body: Body::new(x, y, Vector2::new(CRAB_S, 0.0)),
             w: CRAB_W,
             h: CRAB_H,
             s: CRAB_S,
@@ -129,7 +128,7 @@ impl Crab {
         Ok(c)
     }
 
-    fn update(&mut self, max_screen: f32) -> GameResult {
+    fn update(&mut self, max_screen: f32) -> GameResult<&Self> {
         self.location.x += self.velocity.x;
 
         if self.location.x + (self.w * 2.) >= max_screen {
@@ -140,10 +139,10 @@ impl Crab {
 
         self.claw1.update(self.location)?;
         self.claw2.update(self.location)?;
-        Ok(())
+        Ok(self)
     }
 
-    fn draw(&self, assets: &Assets, ctx: &mut Context) -> GameResult {
+    fn draw(&self, assets: &Assets, ctx: &mut Context) -> GameResult<&Self> {
         let drawparams = graphics::DrawParam::new()
             .dest(self.location)
             .scale(Vector2::new(0.2, 0.2));
@@ -151,7 +150,7 @@ impl Crab {
 
         self.claw1.draw(ctx, &assets.claw_left)?;
         self.claw2.draw(ctx, &assets.claw_right)?;
-        Ok(())
+        Ok(self)
     }
 }
 
@@ -203,7 +202,6 @@ struct State {
 
 impl State {
     fn new(ctx: &mut Context) -> ggez::GameResult<State> {
-        //println!("Game resource path: {:?}", ctx.filesystem);
         println!("Play Crab!");
         println!("Player 1, use WASD!");
         println!("Player 2, use IJKL!");
@@ -226,7 +224,7 @@ impl State {
         Ok(s)
     }
 
-    fn render_ui(&self, ctx: &mut Context) -> GameResult {
+    fn render_ui(&self, ctx: &mut Context) -> GameResult<&Self> {
         let score_1 = graphics::Text::new((format!("Player 1: #{}", self.player1_score),
                                            self.assets.font, 38.0));
         let score_2 = graphics::Text::new((format!("Player 2: #{}", self.player2_score),
@@ -238,21 +236,18 @@ impl State {
                                        0.0,
                                        graphics::BLACK))?;
 
-        Ok(())
+        Ok(self)
     }
 }
 
 impl EventHandler for State {
-    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+    fn update(&mut self, ctx: &mut Context) -> GameResult {
         self.dt = timer::delta(ctx);
         self.crab.update(self.screen_width)?;
-
         Ok(())
     }
-    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+    fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, graphics::WHITE);
-
-        //println!("Hello ggez! dt = {}ns", self.dt.subsec_nanos());
         self.crab.draw(&self.assets, ctx)?;
         self.render_ui(ctx)?;
         graphics::present(ctx)?;
