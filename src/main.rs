@@ -15,19 +15,6 @@ use std::path;
 type Point2 = na::Point2<f32>;
 type Vector2 = na::Vector2<f32>;
 
-fn vec_from_angle(angle: f32) -> Vector2 {
-    let vx = angle.sin();
-    let vy = angle.cos();
-    Vector2::new(vx, vy)
-}
-
-fn random_vec(max_magnitude: f32) -> Vector2 {
-    let angle = rand::random::<f32>() * 2.0 * std::f32::consts::PI;
-    let mag = rand::random::<f32>() * max_magnitude;
-    vec_from_angle(angle) * (mag)
-}
-
-
 const CRAB_H: f32 = 150.0;
 const CRAB_W: f32 = 100.0;
 const CRAB_S: f32 = 1.5;
@@ -35,25 +22,6 @@ const CRAB_S: f32 = 1.5;
 const CLAW_W: f32 = 14.0;
 const CLAW_H: f32 = 50.0;
 const CLAW_S: f32 = 5.0;
-
-struct Body {
-    location: Point2,
-    velocity: Vector2,
-    heading: f32,
-    avelocity: f32
-}
-
-impl Body  {
-    fn new(x:f32, y:f32, v: Vector2) -> Body {
-        let b = Body {
-            location: Point2::new(x, y),
-            velocity: v,
-            heading: 0.,
-            avelocity: 0.
-        };
-        b
-    }
-}
 
 enum Directions {
     Up,
@@ -63,7 +31,7 @@ enum Directions {
 }
 
 struct Claw {
-    body: Body,
+    location: Point2,
     body_anchor: Vector2,
     joint_anchor: Vector2,
     w: f32,
@@ -72,28 +40,30 @@ struct Claw {
 }
 
 impl Claw {
-    fn new(loc: Point2, body_anchor: Vector2, joint_anchor: Vector2) -> Claw {
+    fn new(location: Point2,
+           body_anchor: Vector2,
+           joint_anchor: Vector2) -> GameResult<Claw> {
         let c = Claw {
-            body: Body::new(loc.x, loc.y, na::zero()),
+            location,
             body_anchor,
             joint_anchor,
             w: CLAW_W,
             h: CLAW_H,
             s: CLAW_S
         };
-        c
+        Ok(c)
     }
 
     fn update(&mut self, parent_loc: Point2) -> GameResult {
-        self.body.location = parent_loc;
+        self.location = parent_loc;
         Ok(())
     }
 
     fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult {
-        let b_anchor = Point2::new(self.body.location.x + self.body_anchor.x,
-                                   self.body.location.y + self.body_anchor.y);
-        let j_anchor = Point2::new(self.body.location.x + self.joint_anchor.x,
-                                   self.body.location.y + self.joint_anchor.y);
+        let b_anchor = Point2::new(self.location.x + self.body_anchor.x,
+                                   self.location.y + self.body_anchor.y);
+        let j_anchor = Point2::new(self.location.x + self.joint_anchor.x,
+                                   self.location.y + self.joint_anchor.y);
         let claw_origin = Point2::new(j_anchor.x - self.w, j_anchor.y - self.h);
         let arm = graphics::Mesh::new_line(ctx,
                                            &[b_anchor,
@@ -131,7 +101,8 @@ impl Claw {
 }
 
 struct Crab {
-    body: Body,
+    location: Point2,
+    velocity: Vector2,
     w: f32,
     h: f32,
     s: f32,
@@ -140,39 +111,41 @@ struct Crab {
 }
 
 impl Crab {
-    fn new(x:f32, y:f32) -> Crab {
+    fn new(location: Point2) -> GameResult<Crab> {
         let c = Crab {
-            body: Body::new(x, y, Vector2::new(CRAB_S, 0.0)),
+            location,
+            velocity: Vector2::new(CRAB_S, 0.0),
+            //body: Body::new(x, y, Vector2::new(CRAB_S, 0.0)),
             w: CRAB_W,
             h: CRAB_H,
             s: CRAB_S,
-            claw1: Claw::new(Point2::new(x, y),
+            claw1: Claw::new(location,
                              Vector2::new(CLAW_W, CRAB_H / 2.),
-                             Vector2::new(-30., -20.)),
-            claw2: Claw::new(Point2::new(x, y),
+                             Vector2::new(-30., -20.))?, // magical positioning
+            claw2: Claw::new(location,
                              Vector2::new(CRAB_W + 30.0, CRAB_H / 2.),
-                             Vector2::new(170.0, -20.0))
+                             Vector2::new(170.0, -20.0))? // magical positioning pt2
         };
-        c
+        Ok(c)
     }
 
     fn update(&mut self, max_screen: f32) -> GameResult {
-        self.body.location.x += self.body.velocity.x;
+        self.location.x += self.velocity.x;
 
-        if self.body.location.x + (self.w * 2.) >= max_screen {
-            self.body.velocity.x = - self.s;
-        } else if self.body.location.x < self.w {
-            self.body.velocity.x = self.s;
+        if self.location.x + (self.w * 2.) >= max_screen {
+            self.velocity.x = - self.s;
+        } else if self.location.x < self.w {
+            self.velocity.x = self.s;
         }
 
-        self.claw1.update(self.body.location)?;
-        self.claw2.update(self.body.location)?;
+        self.claw1.update(self.location)?;
+        self.claw2.update(self.location)?;
         Ok(())
     }
 
     fn draw(&self, assets: &Assets, ctx: &mut Context) -> GameResult {
         let drawparams = graphics::DrawParam::new()
-            .dest(self.body.location)
+            .dest(self.location)
             .scale(Vector2::new(0.2, 0.2));
         graphics::draw(ctx, &assets.crab_image, drawparams)?;
 
@@ -244,7 +217,8 @@ impl State {
             player1_score: 0,
             player2_score: 0,
             state: States::Main,
-            crab: Crab::new(width / 2.0 - (CRAB_W / 2.0), height - CRAB_H),
+            crab: Crab::new(Point2::new(width / 2.0 - (CRAB_W / 2.0),
+                                        height - CRAB_H))?,
             screen_width: width,
             screen_height: height,
             assets: assets
