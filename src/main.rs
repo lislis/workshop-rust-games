@@ -34,6 +34,7 @@ const CRAB_S: f32 = 1.5;
 
 const CLAW_W: f32 = 14.0;
 const CLAW_H: f32 = 50.0;
+const CLAW_S: f32 = 5.0;
 
 struct Body {
     location: Point2,
@@ -61,13 +62,13 @@ enum Directions {
     Right
 }
 
-
 struct Claw {
     body: Body,
     body_anchor: Vector2,
     joint_anchor: Vector2,
     w: f32,
-    h: f32
+    h: f32,
+    s: f32
 }
 
 impl Claw {
@@ -77,7 +78,8 @@ impl Claw {
             body_anchor,
             joint_anchor,
             w: CLAW_W,
-            h: CLAW_H
+            h: CLAW_H,
+            s: CLAW_S
         };
         c
     }
@@ -107,6 +109,24 @@ impl Claw {
         graphics::draw(ctx, img, drawparams)?;
 
         Ok(())
+    }
+
+    fn movedir(&mut self, dir:Directions) -> Vector2 {
+        match dir {
+            Directions::Up => {
+                self.joint_anchor.y -= self.s;
+            },
+            Directions::Down => {
+                self.joint_anchor.y += self.s;
+            },
+            Directions::Right => {
+                self.joint_anchor.x += self.s;
+            },
+            Directions::Left => {
+                self.joint_anchor.x -= self.s;
+            }
+        }
+        self.joint_anchor
     }
 }
 
@@ -251,7 +271,6 @@ impl State {
 impl EventHandler for State {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.dt = timer::delta(ctx);
-
         self.crab.update(self.screen_width)?;
 
         Ok(())
@@ -274,28 +293,28 @@ impl EventHandler for State {
         _repeat: bool) {
         match keycode {
             KeyCode::W => {
-                println!("Player 1 UP")
+                self.crab.claw1.movedir(Directions::Up);
             },
             KeyCode::A => {
-                println!("Player 1 Left")
+                self.crab.claw1.movedir(Directions::Left);
             },
             KeyCode::S => {
-                println!("Player 1 Down")
+                self.crab.claw1.movedir(Directions::Down);
             },
             KeyCode::D => {
-                println!("Player 1 Right")
+                self.crab.claw1.movedir(Directions::Right);
             },
             KeyCode::I => {
-                println!("Player 2 Up")
+                self.crab.claw2.movedir(Directions::Up);
             },
             KeyCode::J => {
-                println!("Player 2 Left")
+                self.crab.claw2.movedir(Directions::Left);
             },
             KeyCode::K => {
-                println!("Player 2 Down")
+                self.crab.claw2.movedir(Directions::Down);
             },
             KeyCode::L => {
-                println!("Player 2 Right")
+                self.crab.claw2.movedir(Directions::Right);
             },
             _ => (),
         }
