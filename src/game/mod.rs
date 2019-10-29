@@ -8,6 +8,7 @@ use rand;
 use nalgebra as na;
 
 type Point2 = na::Point2<f32>;
+type Vector2 = na::Vector2<f32>;
 
 mod claw;
 use crate::game::claw::{Directions};
@@ -22,6 +23,46 @@ use crate::config::{CRAB_W, CRAB_H};
 
 
 // tbd snacks
+const SNACK_W: f32 = 10.0;
+
+struct Snack {
+    location: Point2,
+    velocity: Vector2,
+    w: f32
+}
+
+impl Snack {
+    fn new (location: Point2) -> GameResult<Snack> {
+        let s = Snack {
+            location,
+            velocity: Vector2::new(0.0, 1.0),
+            w: SNACK_W
+        };
+        Ok(s)
+    }
+
+    fn update(&mut self) -> GameResult<&Self> {
+        self.location += self.velocity;
+        Ok(self)
+    }
+
+    fn draw(&self, ctx: &mut Context) -> GameResult<&Self> {
+        let rect = graphics::Rect::new(self.location.x,
+                                       self.location.y,
+                                       self.w,
+                                       self.w);
+        let r = graphics::Mesh::new_rectangle(ctx,
+                                              graphics::DrawMode::fill(),
+                                              rect,
+                                              graphics::BLACK)?;
+        graphics::draw(ctx, &r, graphics::DrawParam::default())?;
+        Ok(self)
+    }
+}
+
+fn spawn_snacks(num: usize) -> Vec<Snack> {
+    vec![]
+}
 
 enum States {
     Main,
@@ -33,6 +74,7 @@ pub struct State {
     player2_score: usize,
     state: States,
     crab: Crab,
+    snacks: Vec<Snack>,
     screen_width: f32,
     screen_height: f32,
     assets: Assets
@@ -55,6 +97,7 @@ impl State {
             state: States::Main,
             crab: Crab::new(Point2::new(width / 2.0 - (CRAB_W / 2.0),
                                         height - CRAB_H))?,
+            snacks: spawn_snacks(20),
             screen_width: width,
             screen_height: height,
             assets: assets
