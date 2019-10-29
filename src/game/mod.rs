@@ -1,5 +1,5 @@
 //use ggez::audio;
-//use ggez::audio::SoundSource;
+use ggez::audio::SoundSource;
 use ggez::event::{EventHandler, KeyCode, KeyMods};
 use ggez::graphics;
 use ggez::timer;
@@ -18,8 +18,7 @@ use crate::game::assets::Assets;
 mod crab;
 use crate::game::crab::{Crab};
 
-use crate::config::{CRAB_W,
-                    CRAB_H};
+use crate::config::{CRAB_W, CRAB_H};
 
 
 // tbd snacks
@@ -83,6 +82,9 @@ impl EventHandler for State {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         self.dt = timer::delta(ctx);
         self.crab.update(self.screen_width)?;
+        if !self.assets.bg_sound.playing() {
+            let _ = self.assets.bg_sound.play();
+        }
         Ok(())
     }
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
