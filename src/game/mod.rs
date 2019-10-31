@@ -19,50 +19,10 @@ use crate::game::assets::Assets;
 mod crab;
 use crate::game::crab::{Crab};
 
+mod snacks;
+use crate::game::snacks::{Snack, spawn_snacks};
+
 use crate::config::{CRAB_W, CRAB_H};
-
-
-// tbd snacks
-const SNACK_W: f32 = 10.0;
-
-struct Snack {
-    location: Point2,
-    velocity: Vector2,
-    w: f32
-}
-
-impl Snack {
-    fn new (location: Point2) -> GameResult<Snack> {
-        let s = Snack {
-            location,
-            velocity: Vector2::new(0.0, 1.0),
-            w: SNACK_W
-        };
-        Ok(s)
-    }
-
-    fn update(&mut self) -> GameResult<&Self> {
-        self.location += self.velocity;
-        Ok(self)
-    }
-
-    fn draw(&self, ctx: &mut Context) -> GameResult<&Self> {
-        let rect = graphics::Rect::new(self.location.x,
-                                       self.location.y,
-                                       self.w,
-                                       self.w);
-        let r = graphics::Mesh::new_rectangle(ctx,
-                                              graphics::DrawMode::fill(),
-                                              rect,
-                                              graphics::BLACK)?;
-        graphics::draw(ctx, &r, graphics::DrawParam::default())?;
-        Ok(self)
-    }
-}
-
-fn spawn_snacks(num: usize) -> Vec<Snack> {
-    vec![]
-}
 
 enum States {
     Main,
@@ -125,6 +85,9 @@ impl EventHandler for State {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         self.dt = timer::delta(ctx);
         self.crab.update(self.screen_width)?;
+        for s in self.snacks.iter_mut() {
+            s.update()?;
+        }
         if !self.assets.bg_sound.playing() {
             let _ = self.assets.bg_sound.play();
         }
@@ -132,6 +95,9 @@ impl EventHandler for State {
     }
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, graphics::WHITE);
+        for s in self.snacks.iter() {
+            s.draw(ctx)?;
+        }
         self.crab.draw(&self.assets, ctx)?;
         self.render_ui(ctx)?;
         graphics::present(ctx)?;

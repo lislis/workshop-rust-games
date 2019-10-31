@@ -8,3 +8,5 @@ pub const CRAB_S: f32 = 1.5;
 pub const CLAW_W: f32 = 14.0;
 pub const CLAW_H: f32 = 50.0;
 pub const CLAW_S: f32 = 5.0;
+
+pub const SNACK_W: f32 = 10.0;
