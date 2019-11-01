@@ -9,3 +9,7 @@ Licensed under Creative Commons: By Attribution 3.0 License
 http://creativecommons.org/licenses/by/3.0/
 
 version cut for brevity
+
+## Setting the stage
+
+Make sure you've got [version 1.38.0 or newer of Rust installed before starting](https://www.rust-lang.org/tools/install).
