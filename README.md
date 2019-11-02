@@ -51,3 +51,8 @@ We'll be spending most of our efforts in the contents of the `src` folder, but t
 
 - `Cargo.lock and Cargo.toml` are present in a typical Rust project as a place to declare depdendencies and persist their version management.
 - `resources` is where we'll store our games' assets, be it **fonts, images, audio**, and others.
+
+## Dependencies
+
+Next, let's take a look at the dependencies the project comes with:
+
