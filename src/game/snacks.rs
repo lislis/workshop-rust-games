@@ -6,7 +6,7 @@ use nalgebra as na;
 type Point2 = na::Point2<f32>;
 type Vector2 = na::Vector2<f32>;
 
-use crate::config::{SCREEN_H, SCREEN_W, SNACK_W};
+use crate::game::config::{SCREEN_H, SCREEN_W, SNACK_W};
 
 pub struct Snack {
     location: Point2,

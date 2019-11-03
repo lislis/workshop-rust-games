@@ -5,7 +5,7 @@ use nalgebra as na;
 type Point2 = na::Point2<f32>;
 type Vector2 = na::Vector2<f32>;
 
-use crate::config::{CLAW_W, CLAW_H, CLAW_S};
+use crate::game::config::{CLAW_W, CLAW_H, CLAW_S};
 
 pub enum Directions {
     Up,
@@ -17,9 +17,9 @@ pub enum Directions {
 pub struct Claw {
     pub location: Point2,
     body_anchor: Vector2,
-    pub joint_anchor: Vector2,
-    pub w: f32,
-    pub h: f32,
+    joint_anchor: Vector2,
+    w: f32,
+    h: f32,
     s: f32
 }
 
