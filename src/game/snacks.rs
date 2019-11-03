@@ -38,6 +38,7 @@ impl Snack {
                                         -SNACK_W);
             self.velocity = Vector2::new(0.0,
                                          rand::random::<f32>() * 2.0 + 0.1);
+            self.active = true;
         }
         Ok(self)
     }

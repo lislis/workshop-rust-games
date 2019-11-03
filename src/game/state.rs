@@ -25,7 +25,7 @@ impl State {
         println!("Play Crab!");
         println!("Player 1, use WASD!");
         println!("Player 2, use IJKL!");
-        println!("There will be a pause button eventually!");
+        println!("Have fun!");
 
         let assets = Assets::new(ctx)?;
         let (width, height) = ggez::graphics::drawable_size(ctx);
