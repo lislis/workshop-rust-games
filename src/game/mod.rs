@@ -22,7 +22,7 @@ use crate::game::crab::{Crab};
 mod snacks;
 use crate::game::snacks::{Snack, spawn_snacks};
 
-use crate::config::{CRAB_W, CRAB_H};
+use crate::config::{CRAB_W, CRAB_H, NUM_SNACKS};
 
 enum States {
     Main,
@@ -57,7 +57,7 @@ impl State {
             state: States::Main,
             crab: Crab::new(Point2::new(width / 2.0 - (CRAB_W / 2.0),
                                         height - CRAB_H))?,
-            snacks: spawn_snacks(20),
+            snacks: spawn_snacks(NUM_SNACKS),
             screen_width: width,
             screen_height: height,
             assets: assets
@@ -79,6 +79,20 @@ impl State {
 
         Ok(self)
     }
+
+    fn collision_check(&mut self) {
+        let c1 = self.crab.claw1.get_origin();
+        let c2 = self.crab.claw2.get_origin();
+
+        for s in self.snacks.iter_mut() {
+            if s.collides_with(c1) {
+                self.player1_score += 1;
+            }
+            if s.collides_with(c2) {
+                self.player2_score += 1;
+            }
+        }
+    }
 }
 
 impl EventHandler for State {
@@ -88,9 +102,10 @@ impl EventHandler for State {
         for s in self.snacks.iter_mut() {
             s.update()?;
         }
-        if !self.assets.bg_sound.playing() {
-            let _ = self.assets.bg_sound.play();
-        }
+        //if !self.assets.bg_sound.playing() {
+        //    let _ = self.assets.bg_sound.play();
+        //}
+        self.collision_check();
         Ok(())
     }
     fn draw(&mut self, ctx: &mut Context) -> GameResult {

@@ -33,7 +33,7 @@ impl Crab {
             h: CRAB_H,
             s: CRAB_S,
             claw1: Claw::new(location,
-                             Vector2::new(CLAW_W, CRAB_H / 2.),
+                             Vector2::new(CLAW_W - 20., CRAB_H / 2.),
                              Vector2::new(-30., -20.))?, // magical positioning
             claw2: Claw::new(location,
                              Vector2::new(CRAB_W + 30.0, CRAB_H / 2.),
