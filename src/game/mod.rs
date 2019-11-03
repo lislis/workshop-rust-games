@@ -104,12 +104,13 @@ impl EventHandler for State {
         Ok(())
     }
 
-    fn key_down_event(
+    fn key_up_event(
         &mut self,
         _ctx: &mut Context,
         keycode: KeyCode,
         _keymod: KeyMods,
-        _repeat: bool) {
+    //    _repeat: bool,
+    ) {
         match keycode {
             KeyCode::W => {
                 self.crab.claw1.movedir(Directions::Up);
@@ -123,6 +124,9 @@ impl EventHandler for State {
             KeyCode::D => {
                 self.crab.claw1.movedir(Directions::Right);
             },
+            _ => (),
+        }
+        match keycode {
             KeyCode::I => {
                 self.crab.claw2.movedir(Directions::Up);
             },
