@@ -1,5 +1,6 @@
 use ggez::graphics;
 use ggez::{Context, GameResult};
+use ggez::audio::SoundSource;
 use nalgebra as na;
 
 type Point2 = na::Point2<f32>;
@@ -69,10 +70,12 @@ impl State {
 
         for s in self.snacks.iter_mut() {
             if s.collides_with(c1) {
+                let _ = self.assets.snap_sound.play();
                 self.player1.increase_score()
                     .expect("could not update score");
             }
             if s.collides_with(c2) {
+                let _ = self.assets.snap_sound.play();
                 self.player2.increase_score()
                     .expect("could not update score");
             }
