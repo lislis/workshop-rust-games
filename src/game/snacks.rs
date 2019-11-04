@@ -43,17 +43,12 @@ impl Snack {
         Ok(self)
     }
 
-    pub fn draw(&self, ctx: &mut Context) -> GameResult<&Self> {
+    pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
         if self.active {
-            let rect = graphics::Rect::new(self.location.x,
-                                           self.location.y,
-                                           self.w,
-                                           self.w);
-            let r = graphics::Mesh::new_rectangle(ctx,
-                                                  graphics::DrawMode::fill(),
-                                                  rect,
-                                                  graphics::BLACK)?;
-            graphics::draw(ctx, &r, graphics::DrawParam::default())?;
+            let drawparams = graphics::DrawParam::new()
+                .dest(self.location)
+                .scale(Vector2::new(1.0, 1.0));
+            graphics::draw(ctx, img, drawparams)?;
         }
         Ok(self)
     }
