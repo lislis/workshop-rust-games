@@ -10,7 +10,7 @@ pub struct Assets {
     pub bg_image: graphics::Image,
     pub font: graphics::Font,
     pub bg_sound: audio::Source,
-    //snap_sound: audio::Source,
+    pub snap_sound: audio::Source,
 }
 
 impl Assets {
@@ -21,7 +21,7 @@ impl Assets {
         let bg_image =  graphics::Image::new(ctx, "/sand.png")?;
         let font =  graphics::Font::new(ctx, "/Airstream.ttf")?;
         let bg_sound =  audio::Source::new(ctx, "/Modern-Jazz-Samba-CUT.mp3")?;
-        //snap_sound =  audio::Source::new(ctx, "")?;
+        let snap_sound =  audio::Source::new(ctx, "/woopwoop.mp3")?;
         Ok(Assets {
             crab_image,
             claw_left,
@@ -29,7 +29,7 @@ impl Assets {
             bg_image,
             font,
             bg_sound,
-            //snap_sound
+            snap_sound
         })
     }
 }
