@@ -3,6 +3,7 @@ use ggez::audio::SoundSource;
 use ggez::event::{EventHandler, KeyCode, KeyMods};
 use ggez::graphics;
 use ggez::{Context, GameResult};
+use nalgebra as na;
 
 mod config;
 mod state;
@@ -15,6 +16,8 @@ mod snacks;
 
 pub use crate::game::state::{State};
 pub use crate::game::config::{SCREEN_W, SCREEN_H};
+
+type Point2 = na::Point2<f32>;
 
 impl EventHandler for State {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
@@ -33,6 +36,9 @@ impl EventHandler for State {
     }
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, graphics::WHITE);
+        graphics::draw(ctx,
+                       &self.assets.bg_image,
+                       graphics::DrawParam::new().dest(Point2::new(0., 0.)))?;
         for s in self.snacks.iter() {
             s.draw(ctx)?;
         }
