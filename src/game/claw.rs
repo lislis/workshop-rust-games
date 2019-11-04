@@ -5,7 +5,7 @@ use nalgebra as na;
 type Point2 = na::Point2<f32>;
 type Vector2 = na::Vector2<f32>;
 
-use crate::config::{CLAW_W, CLAW_H, CLAW_S};
+use crate::game::config::{CLAW_W, CLAW_H, CLAW_S};
 
 pub enum Directions {
     Up,
@@ -15,7 +15,7 @@ pub enum Directions {
 }
 
 pub struct Claw {
-    location: Point2,
+    pub location: Point2,
     body_anchor: Vector2,
     joint_anchor: Vector2,
     w: f32,
@@ -44,11 +44,9 @@ impl Claw {
     }
 
     pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
-        let b_anchor = Point2::new(self.location.x + self.body_anchor.x,
-                                   self.location.y + self.body_anchor.y);
-        let j_anchor = Point2::new(self.location.x + self.joint_anchor.x,
-                                   self.location.y + self.joint_anchor.y);
-        let claw_origin = Point2::new(j_anchor.x - self.w, j_anchor.y - self.h);
+        let b_anchor = self.location + self.body_anchor;
+        let j_anchor = self.location + self.joint_anchor;
+
         let arm = graphics::Mesh::new_line(ctx,
                                            &[b_anchor,
                                              j_anchor],
@@ -57,12 +55,18 @@ impl Claw {
         graphics::draw(ctx, &arm, graphics::DrawParam::default())?;
 
         let drawparams = graphics::DrawParam::new()
-            .dest(claw_origin)
+            .dest(self.get_origin())
             .rotation(0.0)
             .scale(Vector2::new(0.2, 0.2));
         graphics::draw(ctx, img, drawparams)?;
 
         Ok(self)
+    }
+
+    pub fn get_origin(&self) -> Point2 {
+        let j_anchor = self.location + self.joint_anchor;
+        let claw_origin = Point2::new(j_anchor.x - self.w / 2., j_anchor.y - self.h);
+        claw_origin
     }
 
     pub fn movedir(&mut self, dir:Directions) -> Vector2 {

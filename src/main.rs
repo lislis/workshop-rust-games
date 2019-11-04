@@ -6,10 +6,8 @@ use std::env;
 use std::path;
 
 mod game;
-use game::State;
-
-mod config;
-use config::{SCREEN_W, SCREEN_H};
+use crate::game::{State};
+use crate::game::{SCREEN_W, SCREEN_H};
 
 pub fn main() -> GameResult {
     let resource_dir = if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {

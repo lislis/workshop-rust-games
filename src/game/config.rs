@@ -5,6 +5,9 @@ pub const CRAB_H: f32 = 150.0;
 pub const CRAB_W: f32 = 100.0;
 pub const CRAB_S: f32 = 1.5;
 
-pub const CLAW_W: f32 = 14.0;
+pub const CLAW_W: f32 = 35.0;
 pub const CLAW_H: f32 = 50.0;
-pub const CLAW_S: f32 = 5.0;
+pub const CLAW_S: f32 = 30.0;
+
+pub const SNACK_W: f32 = 20.0;
+pub const NUM_SNACKS: usize = 20;
