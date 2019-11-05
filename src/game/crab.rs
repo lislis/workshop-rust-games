@@ -27,20 +27,16 @@ impl Crab {
     }
 
     pub fn update(&mut self, max_screen: f32) -> GameResult<&Self> {
-        self.location.x += self.velocity.x;
-        if self.location.x + (self.w * 2.) >= max_screen {
-            self.velocity.x = - self.s;
-        } else if self.location.x < self.w {
-            self.velocity.x = self.s;
-        }
+        /*
+        * TODO: Move crab left to right
+        */
         Ok(self)
     }
 
     pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
-        let drawparams = graphics::DrawParam::new()
-            .dest(self.location)
-            .scale(Vector2::new(0.2, 0.2));
-        graphics::draw(ctx, img, drawparams)?;
+        /*
+        * TODO: Draw crab image
+        */
         Ok(self)
     }
 }

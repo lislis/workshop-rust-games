@@ -27,23 +27,31 @@ impl Player {
     }
 
     pub fn update(&mut self, new_loc: Point2) -> GameResult<&Self> {
-        self.claw.update(new_loc)?;
+        /*
+        * TODO: Update claw
+        */
         Ok(self)
     }
 
     pub fn draw(&self,
                 ctx: &mut Context,
                 img: &graphics::Image) -> GameResult<&Self> {
-        self.claw.draw(ctx, &img)?;
+        /*
+        * TODO: Draw claw
+        */
         Ok(self)
     }
 
     pub fn increase_score(&mut self) -> GameResult<&Self> {
-        self.score += 1;
+        /*
+        * TODO: Make score go up
+        */
         Ok(self)
     }
 
     pub fn movedir(&mut self, dir: Directions) {
-        self.claw.movedir(dir);
+        /*
+        * TODO: Move the claw
+        */
     }
 }
