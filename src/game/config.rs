@@ -9,5 +9,5 @@ pub const CLAW_W: f32 = 35.0;
 pub const CLAW_H: f32 = 50.0;
 pub const CLAW_S: f32 = 30.0;
 
-pub const SNACK_W: f32 = 20.0;
-pub const NUM_SNACKS: usize = 20;
+pub const SNACK_W: f32 = 40.0;
+pub const NUM_SNACKS: usize = 15;

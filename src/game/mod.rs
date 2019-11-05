@@ -40,7 +40,7 @@ impl EventHandler for State {
                        &self.assets.bg_image,
                        graphics::DrawParam::new().dest(Point2::new(0., 0.)))?;
         for s in self.snacks.iter() {
-            s.draw(ctx)?;
+            s.draw(ctx, &self.assets.snack_image)?;
         }
         self.crab.draw(&self.assets, ctx)?;
         self.player1.draw(ctx, &self.assets.claw_left)?;
