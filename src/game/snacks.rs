@@ -46,8 +46,7 @@ impl Snack {
     pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
         if self.active {
             let drawparams = graphics::DrawParam::new()
-                .dest(self.location)
-                .scale(Vector2::new(1.0, 1.0));
+                .dest(self.location);
             graphics::draw(ctx, img, drawparams)?;
         }
         Ok(self)
