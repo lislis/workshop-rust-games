@@ -36,14 +36,19 @@ Here's what you'll find when you clone the project:
 │   ├── claw_left.png
 │   ├── claw_right.png
 │   ├── crab.png
-│   └── snack.png
+│   ├── sand.png
+│   ├── snack.png
+│   └── woopwoop.mp3
 └── src
-    ├── config.rs
     ├── game
     │   ├── assets.rs
     │   ├── claw.rs
+    │   ├── config.rs
     │   ├── crab.rs
-    │   └── mod.rs
+    │   ├── mod.rs
+    │   ├── player.rs
+    │   ├── snacks.rs
+    │   └── state.rs
     └── main.rs
 ```
 
