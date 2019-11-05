@@ -42,7 +42,7 @@ impl EventHandler for State {
         for s in self.snacks.iter() {
             s.draw(ctx, &self.assets.snack_image)?;
         }
-        self.crab.draw(&self.assets, ctx)?;
+        self.crab.draw(ctx, &self.assets.crab_image)?;
         self.player1.draw(ctx, &self.assets.claw_left)?;
         self.player2.draw(ctx, &self.assets.claw_right)?;
 
