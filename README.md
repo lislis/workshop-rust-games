@@ -183,7 +183,7 @@ In this case, we'll take the `bg_image`.
 
 Next come in our `params`. The only one needed here is the [position](https://docs.rs/ggez/0.5.1/ggez/graphics/struct.DrawParam.html): `graphics::DrawParam::new().dest(Point2::new(0., 0.))`
 
-Let's call it with the following:
+Let's replace the TODO with the following:
 
 ```
         graphics::draw(ctx,
