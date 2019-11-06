@@ -34,9 +34,9 @@ impl EventHandler for State {
     }
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, graphics::WHITE);
-        graphics::draw(ctx,
-                       &self.assets.bg_image,
-                       graphics::DrawParam::new().dest(Point2::new(0., 0.)))?;
+        /*
+        * TODO: Draw the background
+        */
         for s in self.snacks.iter() {
             s.draw(ctx, &self.assets.snack_image)?;
         }
