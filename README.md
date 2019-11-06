@@ -81,3 +81,72 @@ Worthy of note here are three dependencies listed underneath the `dependencies` 
 - ggez ([docs](https://ggez.rs)): This is the library that we'll be using to do the heavy lifting in our game's code. This takes care of everything from drawing graphics to audio, as well as event handling (key presses and the like).
 - nalgebra ([docs](https://www.nalgebra.org)): We'll be using this to do our vector algebra (It'll be super fun, promise!)
 - rand ([docs](https://docs.rs/rand/0.7.2/rand/)): This we'll use for generating random numbers.
+
+## Overview
+
+- `main.rs`
+- Explain game module structure
+- `state.rs` declarations
+- `mod.rs` impl of State EventHandler
+- Go into EventHandler (`update`, `draw`, etc.)
+- `config.rs` explanation
+- `assets.rs` explanation
+
+## Getting started
+
+To run the game, we'll be using Cargo:
+
+    $ cargo run
+
+Once the game has compiled and started running, you should see a blank window. Believe it or not, that's what we want! It means the game is running and displaying successfully.
+
+Wondering where the window dimensions are determined? Take another look at `main.rs`:
+```
+    let (ref mut ctx, ref mut event_loop) =
+        ContextBuilder::new("crab", "lislis & ramonh")
+        .window_setup(conf::WindowSetup::default().title("Crab"))
+        .window_mode(conf::WindowMode::default().dimensions(SCREEN_W, SCREEN_H))
+        .add_resource_path(resource_dir)
+        .build()?;
+```
+
+As shown above, we get them from the `SCREEN_W` and `SCREEN_H` variables that in turn are declared in `game/config.rs`. Cool!
+
+All told, this blank window is exciting but also not very dynamic. So how about we...
+
+## Draw the background
+
+Here we go! Our first task in creating our crab game. Time to do some coding!
+
+Let's take a look at `mod.rs`, where the main logic of the event loop takes place. In particular, let's examine the `draw` function:
+
+```
+    fn draw(&mut self, ctx: &mut Context) -> GameResult {
+        graphics::clear(ctx, graphics::WHITE);
+        /*
+        * TODO: Draw the background
+        */
+        for s in self.snacks.iter() {
+            s.draw(ctx, &self.assets.snack_image)?;
+        }
+        self.crab.draw(ctx, &self.assets.crab_image)?;
+        self.player1.draw(ctx, &self.assets.claw_left)?;
+        self.player2.draw(ctx, &self.assets.claw_right)?;
+
+        self.render_ui(ctx)?;
+        graphics::present(ctx)?;
+        Ok(())
+    }
+```
+
+Let's go over the steps here:
+
+1. Clear the window's graphics
+2. Iterate over all snacks and draw each
+3. Draw the crab
+4. Draw player 1
+5. Draw player 2
+6. Render the UI (Score, etc.)
+7. Do the actual drawing
+8. Return an `OK` `GameResult`
+
