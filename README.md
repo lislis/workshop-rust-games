@@ -190,3 +190,5 @@ Let's replace the TODO with the following:
                        &self.assets.bg_image,
                        graphics::DrawParam::new().dest(Point2::new(0., 0.)))?;
 ```
+
+Let's re-run the game, et voilà! You now have a sandy beach on your game window.
