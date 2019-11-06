@@ -5,7 +5,6 @@ use nalgebra as na;
 type Point2 = na::Point2<f32>;
 type Vector2 = na::Vector2<f32>;
 
-use crate::game::assets::Assets;
 use crate::game::config::{CRAB_W,
                           CRAB_S};
 
@@ -37,11 +36,11 @@ impl Crab {
         Ok(self)
     }
 
-    pub fn draw(&self, assets: &Assets, ctx: &mut Context) -> GameResult<&Self> {
+    pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
         let drawparams = graphics::DrawParam::new()
             .dest(self.location)
             .scale(Vector2::new(0.2, 0.2));
-        graphics::draw(ctx, &assets.crab_image, drawparams)?;
+        graphics::draw(ctx, img, drawparams)?;
         Ok(self)
     }
 }

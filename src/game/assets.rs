@@ -1,7 +1,6 @@
 use ggez::{Context, GameResult};
 use ggez::graphics;
 use ggez::audio;
-//use ggez::audio::SoundSource;
 
 pub struct Assets {
     pub crab_image: graphics::Image,
