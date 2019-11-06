@@ -148,5 +148,45 @@ Let's go over the steps here:
 5. Draw player 2
 6. Render the UI (Score, etc.)
 7. Do the actual drawing
-8. Return an `OK` `GameResult`
+8. Return an `Ok` `GameResult`
 
+One thing you'll find here is a TODO.
+
+The TODO is asking that we draw the background image.
+
+Let's take a look at [graphics::draw](https://docs.rs/ggez/0.5.1/ggez/graphics/fn.draw.html).
+
+The signature is made up of three parts:
+
+- A graphics `Context`
+- A `Drawable`
+- A set of drawing `params`
+
+We already have access to our graphics context `ctx`, next we need our `Drawable`.
+
+This is to be our image! Let's have a look at our `Assets` and see which images we have available:
+
+```
+Assets {
+            crab_image,
+            claw_left,
+            claw_right,
+            bg_image,
+            snack_image,
+            font,
+            bg_sound,
+            snap_sound
+        }
+```
+
+In this case, we'll take the `bg_image`.
+
+Next come in our `params`. The only one needed here is the [position](https://docs.rs/ggez/0.5.1/ggez/graphics/struct.DrawParam.html): `graphics::DrawParam::new().dest(Point2::new(0., 0.))`
+
+Let's call it with the following:
+
+```
+        graphics::draw(ctx,
+                       &self.assets.bg_image,
+                       graphics::DrawParam::new().dest(Point2::new(0., 0.)))?;
+```
