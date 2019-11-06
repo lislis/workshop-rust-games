@@ -321,3 +321,87 @@ You might be guessing already! We now need to check if the location of the crab 
 With this done, let's give this one more try...
 
 Magnificent! The crab gallantly bounces from end to end. Well done! We now have a living and breathing crab buddy.
+
+## Implementing the `player`
+
+Let's briefly open `player.rs` and examine its `Player` struct:
+
+```
+pub struct Player {
+    pub score: usize,
+    pub claw: Claw
+}
+```
+
+Let's see here, we've got a `usize` 
+
+A `claw`, eh? Well, if we're going to be concerning ourselves with a claw, let's implement that right away! 
+
+
+## Implementing the ~~`player`~~ `crab`
+
+Well, let's glance at that too, over at `claw.rs`:
+
+```
+pub struct Claw {
+    pub location: Point2,
+    body_anchor: Vector2,
+    joint_anchor: Vector2,
+    w: f32,
+    h: f32,
+    s: f32
+}
+```
+
+Let's see what we've got here:
+
+- A location `Point2`, [just like we had on the crab](https://github.com/lislis/workshop-rust-games/tree/writeup#implementing-the-crab)
+- An body anchor `Vector2` to determine the position of the crab relative to the claw
+- An joint anchor `Vector2` to determine the position of the claw itself
+- An `f32` to determine the width `w`
+- An `f32` to determine the height `h`
+- An `f32` to determine the speed `s`
+
+## Implementing the `player` (for realsies this time)
+
+Next, we'll look at the function for declaring a `new` player:
+
+```
+    pub fn new(loc: Point2,
+               b_anchor: Vector2,
+               j_anchor: Vector2) -> GameResult<Player> {
+        let p = Player {
+            score: 0,
+            claw: Claw::new(loc,
+                            b_anchor,
+                            j_anchor)?
+        };
+        Ok(p)
+    }
+```
+
+Great, so to declare a new player, we need to pass to it the location (as you'll see in a bit, that of the crab!), as well as a body and joint pair of anchors. We'll examine those more closely later when we work on our
+
+Taking a quick glance back at `state.rs`, we declare not one, but two instances of the `Player` struct (makes sense, this is a 2-player game after all!):
+
+```
+        let assets = Assets::new(ctx)?;
+        let (width, height) = ggez::graphics::drawable_size(ctx);
+        let crab_origin = Point2::new(width / 2.0 - (CRAB_W / 2.0),
+                                      height - CRAB_H);
+
+        let s = State {
+            player1: Player::new(crab_origin,
+                                 Vector2::new(CLAW_W - 20., CRAB_H / 2.),
+                                 Vector2::new(-30., -20.))?,
+            player2: Player::new(crab_origin,
+                                 Vector2::new(CRAB_W + 30.0, CRAB_H / 2.),
+                                 Vector2::new(170.0, -20.0))?,
+            crab: Crab::new(crab_origin)?,
+            snacks: spawn_snacks(NUM_SNACKS),
+            screen_width: width,
+            assets: assets
+        };
+```
+
+We can see here that we're declaring each player
