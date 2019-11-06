@@ -192,3 +192,64 @@ Let's replace the TODO with the following:
 ```
 
 Let's re-run the game, et voilà! You now have a sandy beach on your game window.
+
+## Implementing the `crab`
+
+Next, let's take a look at `crab.rs`. Our crustacean friend will move left-to-right and then right-to-left, depending on which way they're going.
+
+Let's first take a gander at the `Crab` struct:
+
+```
+pub struct Crab {
+    pub location: Point2,
+    velocity: Vector2,
+    w: f32,
+    s: f32
+}
+```
+
+What we've got here is:
+- a `Point2` (that is, [a 2-dimensional point in 2D space](https://www.nalgebra.org/rustdoc/nalgebra/geometry/type.Point2.html)) that makes up the crab's location inside the game space
+- a `Vector2` making up the [velocity](https://www.nalgebra.org/rustdoc/nalgebra/base/type.Vector2.html) the crab is headed in (that being left or right)
+- an `f32` (floating point number) that describes the crab's width (`w`)
+- and finally, an `f32` describing the crab's natural speed (`s`)
+
+You'll notice that the `location` attribute is preceeded by the `pub` declaration. This allows the crab's location to be called up outside the `Crab` module!
+
+Next, we've got our `impl` section for the crab, along with some finished and non-finished functions. Let's first take a look at what happens when a new `crab` is instantiated:
+
+```
+    pub fn new(location: Point2) -> GameResult<Crab> {
+        let c = Crab {
+            location,
+            velocity: Vector2::new(CRAB_S, 0.0),
+            w: CRAB_W,
+            s: CRAB_S
+        };
+        Ok(c)
+    }
+```
+
+What this function does is it takes a starting location as a parameter and results a `GameResult` wrapped around a seaworthy new crab!
+
+Also worthy of note are the default values for the crab's attributes, most of which the velocity being initially set to `[CRAB_S, 0.0]`. In geometric terms, this crab will move to the right, providing `CRAB_S` is set to a positive value. A quick glance at `config.rs` confirms that this is indeed the case!
+
+Before we continue, it's worth noting that in `mod.rs` we call the crab's `draw` function inside the event loop's corresponding `draw` function:
+
+```
+self.crab.draw(ctx, &self.assets.crab_image)?;
+```
+
+You may wonder why it does nothing, right? Well, going back to `crab.rs` and inspecting the `draw` function here reveals the culprit:
+
+```
+    pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
+        /*
+        * TODO: Draw crab image
+        */
+        Ok(self)
+    }
+```
+
+We gotta do the actual drawing!
+
