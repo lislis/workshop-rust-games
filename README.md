@@ -253,3 +253,71 @@ You may wonder why it does nothing, right? Well, going back to `crab.rs` and ins
 
 We gotta do the actual drawing!
 
+# YO RAMON LINK TO THE BACKGROUND DRAWING SECTION WHEN YOU"RE DONE
+
+As you may recall from drawing the background graphics, we'll be calling `graphics::draw`
+
+Our params in this case will be a little more complex, however, as we'll also be scaling the image down (the original is large!):
+
+```
+    pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
+        let drawparams = graphics::DrawParam::new()
+            .dest(self.location)
+            .scale(Vector2::new(0.2, 0.2));
+        graphics::draw(ctx, img, drawparams)?;
+        Ok(self)
+    }
+```
+
+Done! Now you can run the game and be greeted by our debonaire crab. 
+
+Looking good, crab! But now they've gotta start moving. Let's look at the crab's `update` method, which in turn is called from the `update` method in the event loop, implemented in `mod.rs`:
+
+```
+    pub fn update(&mut self, parent_loc: Point2) -> GameResult<&Self> {
+        /*
+        * TODO: Update claw location according to body's location
+        */
+        Ok(self)
+    }
+```
+
+Another TODO! What we want to do now is adjust the crab's location based on its velocity. Remember, the `update` function will be called for every frame refresh, so every time the game screen refreshes, the crab will be moved only as much as its velocity dictates:
+
+```
+        self.location.x += self.velocity.x;
+```
+
+With that said and done, let's run our game!
+
+There they go!... And still going... And gone. Some say the crab's moving right even as we speak.
+
+No problem, all we have to do is after updating the crab's location, check if they've reached the right-most end of the screen. We'll do that by comparing the location of the crab with the right-most end of the screen. Good thing we're passing that `max_screen` parameter! If it does, we just set the `x` factor of the velocity to be the same, but negative:
+
+```
+        if self.location.x + (self.w * 2.) >= max_screen {
+            self.velocity.x = - self.s;
+        }
+```
+
+With that done, let's run the game again!
+
+You'll notice that the crab successfully bounces of the right side of the screen. But wait, what about the left side... oh no there it goes.
+
+You might be guessing already! We now need to check if the location of the crab has reached the left-most side:
+
+```
+    pub fn update(&mut self, max_screen: f32) -> GameResult<&Self> {
+        self.location.x += self.velocity.x;
+        if self.location.x + (self.w * 2.) >= max_screen {
+            self.velocity.x = - self.s;
+        } else if self.location.x < self.w {
+            self.velocity.x = self.s;
+        }
+        Ok(self)
+    }
+```
+
+With this done, let's give this one more try...
+
+Magnificent! The crab gallantly bounces from end to end. Well done! We now have a living and breathing crab buddy.
