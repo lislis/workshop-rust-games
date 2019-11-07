@@ -10,6 +10,11 @@ http://creativecommons.org/licenses/by/3.0/
 
 version cut for brevity
 
+## Table of contents
+
+- [Setting the stage](#setting-the-stage)
+- [Project Contents](#project-contents)
+
 ## Setting the stage
 
 Make sure you've got [version 1.38.0 or newer of Rust installed before starting](https://www.rust-lang.org/tools/install).
