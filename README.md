@@ -356,11 +356,205 @@ pub struct Claw {
 Let's see what we've got here:
 
 - A location `Point2`, [just like we had on the crab](https://github.com/lislis/workshop-rust-games/tree/writeup#implementing-the-crab)
-- An body anchor `Vector2` to determine the position of the crab relative to the claw
+- An body anchor `Vector2` to determine the position of the edge of the crab relative to the claw
 - An joint anchor `Vector2` to determine the position of the claw itself
 - An `f32` to determine the width `w`
 - An `f32` to determine the height `h`
 - An `f32` to determine the speed `s`
+
+With that said, let's take a look at the function to create a `new` `Claw`:
+
+```
+    pub fn new(location: Point2,
+               body_anchor: Vector2,
+               joint_anchor: Vector2) -> GameResult<Claw> {
+        let c = Claw {
+            location,
+            body_anchor,
+            joint_anchor,
+            w: CLAW_W,
+            h: CLAW_H,
+            s: CLAW_S
+        };
+        Ok(c)
+    }
+```
+
+Cool! So we give it a location, the body anchor as well as the joint anchor.
+
+You may have noticed a function called `get_origin`. Why do we need this?
+
+In order to go into it, we need to look closely into the relationship between the `location`, `body_anchor`, `joint_anchor` and the claw's origin:
+
+- The `location`, as stated before, is where the crab is in the game space
+- The `body_anchor` is the point on the crab where their arm begins (this is either the leftmost or rightmost side of the crab, depending on which claw we're working on.)
+- The `joint_anchor` is the location of the bottom horizontal middle of the claw
+- The claw's origin is then the top-left corner of the claw
+
+The aim of the `get_origin` function is therefore to dynamically calculate the origin of the claw. We can calculate each coordinate of this origin:
+
+The `x` coordinate would be the `x` coordinate of the horizontal middle of the claw (based on the `joint_anchor` relative to the crab) minus a half of the width of the claw
+- The `y` coordinate would be the `y` coordinate of the bottom of the claw (based on the `joint_anchor` relative to the crab) minus the height of the claw
+
+Both of the above mention a relative position. This requires adding the location of the crab to the `joint_anchor` and then calculating the coordinates and then returning a new `Point`:
+
+```
+    pub fn get_origin(&self) -> Point2 {
+        let joint_position = self.location + self.joint_anchor;
+        let x = joint_position.x - self.w / 2.;
+        let y = joint_position.y - self.h;
+        Point2::new(x, y)
+    }
+```
+
+Not too shabby! Now that we have this origin we can get to `draw`'ing the claw itself:
+
+```
+    pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
+        /*
+        * TODO: 
+        * 1. Draw a pure red line from the body to the claw
+        * 2. Draw the claw image
+        */
+        Ok(self)
+    }
+```
+
+First, let's draw the claw image itself from part 2, just like we draw the crab, except we're using the origin:
+
+```
+        let drawparams = graphics::DrawParam::new()
+            .dest(self.get_origin())
+            .rotation(0.0)
+            .scale(Vector2::new(0.2, 0.2));
+        graphics::draw(ctx, img, drawparams)?;
+```
+
+Once we've done that, try running the game. The crab now has disembodied claws floating around them! A great step, but er...
+
+Next, we'll draw the arm of the crab. This will involve drawing a [`graphics::Mesh::new_line`](https://docs.rs/ggez/0.5.1/ggez/graphics/struct.Mesh.html#method.new_line) from the `body_anchor` to the `joint_anchor`. The function takes four parameters:
+
+- The graphics context
+- A vector (list) of points. That is, a start and finish of the line.
+- The width of the line
+- A [`Color`](https://docs.rs/ggez/0.5.1/ggez/graphics/struct.Color.html)
+
+Let's first construct our color. It takes a series of `rgba` numbers. We'll need a red color, so we'll assign it accordingly. We'll then need the relative locations of our body and joints respectively, and then we're ready to go:
+
+```
+        let redColor = graphics::Color::new(1.0, 0.0, 0.0, 1.0);
+        let body_location = self.location + self.body_anchor;
+        let joint_location = self.location + self.joint_anchor;
+        let arm = graphics::Mesh::new_line(ctx,
+                                           &[body_location,
+                                             joint_location],
+                                           10.,
+                                           redColor)?;       
+```
+
+Once we have this, all we gotta do is draw the arm:
+
+```
+        graphics::draw(ctx, &arm, graphics::DrawParam::default())?;
+```
+
+Check it out! You now have a crab with little claws going around. 
+
+Let's take a step back and look at our completed `draw` function:
+
+```
+    pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
+        let b_anchor = self.location + self.body_anchor;
+        let j_anchor = self.location + self.joint_anchor;
+
+        let arm = graphics::Mesh::new_line(ctx,
+                                           &[b_anchor,
+                                             j_anchor],
+                                           10.,
+                                           graphics::Color::new(1.0, 0.0, 0.0, 1.0))?;
+        graphics::draw(ctx, &arm, graphics::DrawParam::default())?;
+
+        let drawparams = graphics::DrawParam::new()
+            .dest(self.get_origin())
+            .rotation(0.0)
+            .scale(Vector2::new(0.2, 0.2));
+        graphics::draw(ctx, img, drawparams)?;
+
+        Ok(self)
+```
+
+Phew! Looks good.
+
+Let's move onto the `update` function now, which will be considerably quicker:
+
+```
+    pub fn update(&mut self, parent_loc: Point2) -> GameResult<&Self> {
+        /*
+        * TODO: Update claw location according to body's location
+        */
+        Ok(self)
+    }
+```
+
+As you saw when drawing the claw, the claw's `location` attribute is that of the crab. `parent_loc` in this context refers to the location of the crab, so in order to `update` the claw, we just need to update the `location` attribute:
+
+```
+self.location = parent_loc
+```
+
+Fantastic! If we run this, the claws will now move relative to the crab. Very cool!
+
+One more function to go! This time, we've got the `movedir` function:
+
+```
+    pub fn movedir(&mut self, dir:Directions) -> Vector2 {
+        /*
+        * TODO: Change joint anchor according to direction
+        */
+        Vector2::new(0., 0.)
+    }
+```
+
+You'll notice it takes a `Directions` as a parameter. This is an enum we delcared here in `claw.rs`:
+
+```
+pub enum Directions {
+    Up,
+    Down,
+    Left,
+    Right
+}
+```
+
+Depending on which direction the claw receives, it'll move accordingly.
+
+In order to move the claw, we need to update its `joint_anchor`. We'll use pattern matching (You can read the [Rust docs on pattern matching](https://doc.rust-lang.org/1.6.0/book/patterns.html) if you don't know what it is. It's super cool!) on the received direction to do this. Replace the contents of the function with the following:
+
+```
+    pub fn movedir(&mut self, dir:Directions) -> Vector2 {
+        match dir {
+            Directions::Up => {
+                self.joint_anchor.y -= self.s;
+            },
+            Directions::Down => {
+                self.joint_anchor.y += self.s;
+            },
+            Directions::Right => {
+                self.joint_anchor.x += self.s;
+            },
+            Directions::Left => {
+                self.joint_anchor.x -= self.s;
+            }
+        }
+        self.joint_anchor
+    }
+```
+
+Depending on which direction is received by the claw, it'll update the coordinate of its joint accordingly.
+
+With that done, we've still got a ways to go until we can test this movement, but hey! Quick pat on the back, as you've implemented the claw!
+
+Give it a quick run and check that it still compiles.
 
 ## Implementing the `player` (for realsies this time)
 
