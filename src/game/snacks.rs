@@ -49,7 +49,8 @@ impl Snack {
     pub fn collides_with(&mut self, other: Point2) -> bool {
         /*
         * TODO: 
-        * Draw the snack, but only if it's active
+        * Check whether the snack has collided with something,
+        * providing it's active
         */
         false
     }
