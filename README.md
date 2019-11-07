@@ -674,4 +674,260 @@ Not bad, eh? With that, we've deftly dealt with the player!
 
 Now comes the one of the big parts! You see, the game will be controlled by the keyboard. You might've seen already in `state.rs` that this will be done with the `WASD` keys for player 1 and the `IJKL` keys  for player 2, corresponding to up, left, down and right respectively.
 
+Let's pop over the `mod.rs`, where we'll be taking a look at this function:
+
+```
+    fn key_up_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: KeyCode,
+        _keymod: KeyMods
+    ) {
+        /*
+        * TODO: Provide 2 key matches. One for player 1 and the other for player 2
+        */
+    }
+```
+
+This function will be automatically called up when a player **lifts** up their finger from the keyboard (trust us when we say this makes for a good laugh!) What we'll do here is pattern matching like we did in the previous section to determine which key is being pressed and pass that onto the according player with the appropriate direction. 
+
+You'll notice that one of the parameters passed by the function is the `keycode` one. This will let us know which key the player pressed.
+
+Let's try making it happen for player 1:
+
+```
+        match keycode {
+            KeyCode::W => {
+                self.player1.movedir(Directions::Up);
+            },
+            KeyCode::A => {
+                self.player1.movedir(Directions::Left);
+            },
+            KeyCode::S => {
+                self.player1.movedir(Directions::Down);
+            },
+            KeyCode::D => {
+                self.player1.movedir(Directions::Right);
+            },
+            _ => (),
+        }
+```
+
+Give it a go! You'll notice that player 1 can already start moving. All good, but what about player 2? We **could** add a few more cases for pattern matching against the keycode, but that would mean that there could be times where both players would trigger the event and one of them would be gobbled up, never to be found! 
+
+What we'll do instead is add an identical pattern matching set of cases below. The completed function will look like this:
+
+```
+    fn key_up_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: KeyCode,
+        _keymod: KeyMods
+    ) {
+        match keycode {
+            KeyCode::W => {
+                self.player1.movedir(Directions::Up);
+            },
+            KeyCode::A => {
+                self.player1.movedir(Directions::Left);
+            },
+            KeyCode::S => {
+                self.player1.movedir(Directions::Down);
+            },
+            KeyCode::D => {
+                self.player1.movedir(Directions::Right);
+            },
+            _ => (),
+        }
+        match keycode {
+            KeyCode::I => {
+                self.player2.movedir(Directions::Up);
+            },
+            KeyCode::J => {
+                self.player2.movedir(Directions::Left);
+            },
+            KeyCode::K => {
+                self.player2.movedir(Directions::Down);
+            },
+            KeyCode::L => {
+                self.player2.movedir(Directions::Right);
+            },
+            _ => (),
+        }
+    }
+```
+
+There we go! Give it a try now. Our crab pal can now move their claws!
+
+> Hey while you're at it, make the crab give itself a highfive!
+
+## Implementing the `snack`s
+
+Now that we've gotten the claw-waving out of our systems, it's time to make the final chunk of the game happen: The snacks!
+
+> Fun fact: Crabs eat algae
+
+We'll begin by taking a look at `snacks.rs`. Specifically, we'll look at the `Snack` struct:
+
+```
+pub struct Snack {
+    location: Point2,
+    velocity: Vector2,
+    w: f32,
+    active: bool
+}
+```
+
+Okay what we see here should be mostly familiar to us by now:
+
+- A location `Point2`
+- A moving velocity `Vector2`
+- An `f32` width `w`
+- A boolean flag indicating whether the snack is active
+
+A quick glance at the `new` function shows us the default values:
+
+```
+    fn new () -> GameResult<Snack> {
+        let s = Snack {
+            location: Point2::new(rand::random::<f32>() * SCREEN_W,
+                                  rand::random::<f32>() * SCREEN_H - SCREEN_H),
+            velocity: Vector2::new(0.0,
+                                   rand::random::<f32>() * 2.0 + 0.1),
+            w: SNACK_W,
+            active: true
+        };
+        Ok(s)
+    }
+```
+
+Here we can see why we're using the `rand` crate. The location will be a random `x` coordinate between the left and rightmost sides of the screen, and the `y` will randomly be somewhere above the screen (so that it looks like the snacks are raining down on our crab buddy).
+
+By default, a new snack will always be `active`.
+
+The first function we'll implement is called up by `state.rs` when setting up the game:
+
+```
+pub fn spawn_snacks(num: usize) -> Vec<Snack> {
+        /*
+        * TODO: 
+        * Generate snacks
+        */
+        vec![]
+}
+```
+
+At the moment, this returns an empty vector of sadness. What we need is to return a vector of snacks. How many, you ask? We can set that up in `config.rs` with the `NUM_SNACKS` variable. Let's make that many, as passed down from State!
+
+```
+pub fn spawn_snacks(num: usize) -> Vec<Snack> {
+       (0..num).map(|_v| Snack::new()
+                 .expect("Could not create snack")).collect()
+}
+```
+
+We'll iterate `num` times, create a new snack for each, and then call `collect()` to transform the iterator into a vector. All done!
+
+Next we'll `draw` our snack. This should already be somewhat familiar:
+
+```
+    pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
+        /*
+        * TODO: 
+        * Draw the snack, but only if it's active
+        */
+        Ok(self)
+    }
+```
+
+That's right, we gotta draw its image! Big caveat here, though: We'll only be drawing the snack if it's active, okay?
+
+```
+        if self.active {
+            let drawparams = graphics::DrawParam::new()
+                .dest(self.location);
+            graphics::draw(ctx, img, drawparams)?;
+        }
+```
+
+Looks good so far! We won't be scaling it, as the image is small enough. 
+
+Alright, next up we'll take a look at the `update` function:
+
+```
+    pub fn update(&mut self) -> GameResult<&Self> {
+        /*
+        * TODO: 
+        * 1. Move snack down
+        * 2. Set active to false if the snack has left the screen
+        * 3. If not active, reset the snack
+        */
+        Ok(self)
+    }
+```
+
+Okay three parts here. Let's first move the snack down using its velocity.
+
+```
+        self.location += self.velocity;
+```
+
+As shown in the `new` function, the velocity will have a random downwards trajectory.
+
+Next, we'll set the snack to be inactive if it's left the bottom of the screen:
+
+```
+        if self.location.y > SCREEN_H {
+            self.active = false;
+        }
+```
+
+Looks good! We're checking the `y` coordinate of the snack against the height of the screen.
+
+Next, we'll reset the snack if it's inactive:
+
+```
+        if !self.active {
+            self.location = Point2::new(rand::random::<f32>() * SCREEN_W,
+                                        -SNACK_W);
+            self.velocity = Vector2::new(0.0,
+                                         rand::random::<f32>() * 2.0 + 0.1);
+            self.active = true;
+        }
+```
+
+You'll notice that the location and velocity are being set in the same way as when initializing a `new` snack. Then we set the `active` flag back to true.
+
+Take a step back and look at the `update` function:
+
+```
+    pub fn update(&mut self) -> GameResult<&Self> {
+        self.location += self.velocity;
+        if self.location.y > SCREEN_H {
+            self.active = false;
+        }
+        if !self.active {
+            self.location = Point2::new(rand::random::<f32>() * SCREEN_W,
+                                        -SNACK_W);
+            self.velocity = Vector2::new(0.0,
+                                         rand::random::<f32>() * 2.0 + 0.1);
+            self.active = true;
+        }
+        Ok(self)
+    }
+```
+
+Looks good! 
+
+Now we've got some geometry to do. Let's look at `collides_with`:
+
+```
+    pub fn collides_with(&mut self, other: Point2) -> bool {
+        /*
+        * TODO: 
+        * Draw the snack, but only if it's active
+        */
+        false
+    }
+```
 
