@@ -925,9 +925,121 @@ Now we've got some geometry to do. Let's look at `collides_with`:
     pub fn collides_with(&mut self, other: Point2) -> bool {
         /*
         * TODO: 
-        * Draw the snack, but only if it's active
+        * Check whether the snack has collided with something,
+        * providing it's active
         */
         false
     }
 ```
+
+If the snack has collided with the point provided, it'll return `true`.
+
+# TODO: AHHHH HOW TO EXPLAIN `norm`
+
+Our completed function will look as follows:
+
+```
+    pub fn collides_with(&mut self, other: Point2) -> bool {
+        if self.active {
+            let distance = self.location - other;
+            if distance.norm() < self.w {
+                self.active = false;
+                return true
+            }
+        }
+        false
+    }
+```
+
+With that, we're good to go!
+
+Why not run the game? You can see the little snackoos falling all over the darn place! 
+
+Nothing happens when your claws touch one though... Hmm, what's next?
+
+## Scoring points!
+
+You'll notice in the event loop's `update` function (`mod.rs`) we're calling the `collision_check` function. This is currently in `state.rs`, unimplemented. So that's what we're gonna do next! Here's how it looks:
+
+```
+    pub fn collision_check(&mut self) {
+        let c1 = self.player1.claw.get_origin();
+        let c2 = self.player2.claw.get_origin();
+        /*
+        * TODO:
+        * Loop over the snacks and check whether they've collided with either claw!
+        * If it collides with either:
+        * 1. Play the sound
+        * 2. Increase player's score
+        */
+    }
+```
+
+Alright, we've got our work cut out for us here! First we'll do our loop. Note that this will affect the snacks (might set their active flag to `false`), so this will have to involve a mutating iterator:
+
+```
+        for s in self.snacks.iter_mut() {
+            
+        }
+```
+
+Cool! Now we're going through each snack. Now we can call the `collides_with` function on each snack to see if they collided with a player. Let's first try this with player 1. We can then increase the player's score if the collision was detected:
+```
+if s.collides_with(c1) {
+                self.player1.increase_score()
+                    .expect("could not update score");
+            }
+```
+
+Now how about playing the sound? Well, ggez's [AudioSource](https://docs.rs/ggez/0.5.0-rc.1/ggez/audio/trait.SoundSource.html) module provides us with a `play` function. We just need to do something with its returned value:
+
+```
+if s.collides_with(c1) {
+                let _ = self.assets.snap_sound.play();
+                self.player1.increase_score()
+                    .expect("could not update score");
+            }
+```
+
+Excellent! Now we can try it out. Touch a snack will cause our delightful *WOOPWOOPWOOP* to happen.
+
+Let's now repeat the same for player2:
+
+```
+if s.collides_with(c2) {
+                let _ = self.assets.snap_sound.play();
+                self.player2.increase_score()
+                    .expect("could not update score");
+            }
+```
+
+Noice! Almost the same, but with 2 instead of 1.
+
+Let's take a step back and look at our completed `collision_check` function:
+
+```
+    pub fn collision_check(&mut self) {
+        let c1 = self.player1.claw.get_origin();
+        let c2 = self.player2.claw.get_origin();
+
+        for s in self.snacks.iter_mut() {
+            if s.collides_with(c1) {
+                let _ = self.assets.snap_sound.play();
+                self.player1.increase_score()
+                    .expect("could not update score");
+            }
+            if s.collides_with(c2) {
+                let _ = self.assets.snap_sound.play();
+                self.player2.increase_score()
+                    .expect("could not update score");
+            }
+        }
+    }
+```
+
+Looking snazzy! Starting the game will allow it to now be fully played! Awwwww yes!
+
+## Final touches
+
+
 
