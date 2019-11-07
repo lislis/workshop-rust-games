@@ -1041,5 +1041,96 @@ Looking snazzy! Starting the game will allow it to now be fully played! Awwwww y
 
 ## Final touches
 
+There's a last few touches missing to make the game fully enjoyable: Namely, some background music and showing the scores!
 
+Let's start with the former. You'll notice that the `update` function in `mod.rs` is missing the background music:
 
+```
+    fn update(&mut self, _ctx: &mut Context) -> GameResult {
+        for s in self.snacks.iter_mut() {
+            s.update()?;
+        }
+        self.crab.update(self.screen_width)?;
+        self.player1.update(self.crab.location)?;
+        self.player2.update(self.crab.location)?;
+        self.collision_check();
+        /*
+        * TODO: Play the background music
+        */
+        Ok(())
+    }
+```
+
+Okay so just like the `snap_sound`, we need to `play` the background music:
+
+```
+    let _ = self.assets.bg_sound.play();
+```
+
+However, this will play the background music constantly, which we don't want! Fortunately, we can check if it's not already playing:
+
+```
+        if !self.assets.bg_sound.playing() {
+            let _ = self.assets.bg_sound.play();
+        }
+```
+
+Try it out! Now we have some jazzy tunes to accompany our good times.
+
+Lastly, let's look at `state.rs`'s `render_ui` function:
+
+```
+    pub fn render_ui(&self, ctx: &mut Context) -> GameResult<&Self> {
+        let score_1 = graphics::Text::new((format!("Player 1: #{}",
+                                                   self.player1.score),
+                                           self.assets.font, 38.0));
+        let score_2 = graphics::Text::new((format!("Player 2: #{}",
+                                                   self.player2.score),
+                                           self.assets.font, 38.0));
+        /*
+        * TODO:
+        * Display the scores on the screen!
+        */
+        Ok(self)
+    }
+```
+
+With this, we'll have to do some drawing, just like we've done so many times before:
+
+```
+    pub fn render_ui(&self, ctx: &mut Context) -> GameResult<&Self> {
+        let score_1 = graphics::Text::new((format!("Player 1: #{}",
+                                                   self.player1.score),
+                                           self.assets.font, 38.0));
+        let score_2 = graphics::Text::new((format!("Player 2: #{}",
+                                                   self.player2.score),
+                                           self.assets.font, 38.0));
+        graphics::draw(ctx, &score_1, (Point2::new(10.0, 10.0),
+                                       0.0,
+                                       graphics::BLACK))?;
+        graphics::draw(ctx, &score_2, (Point2::new(self.screen_width - 180.00, 10.0),
+                                       0.0,
+                                       graphics::BLACK))?;
+        Ok(self)
+    }
+ ```
+ 
+You'll notice that we'll be drawing each score at the top left and top right corners of the screen, respectively. 
+ 
+Given that we're already updating the score when we snag a snack, running the game will already show this and update it accordingly!
+ 
+Guess what: You are now officially done. 🎉🎉🎉🎉🎉
+
+## What's next?
+
+Well! First, you should take a moment to enjoy the game. Look at what we've accomplished! Are you pairing with someone? Challenge a neighbor to some friendly competition!
+
+Here's some ideas for what you could do to expand on the game:
+
+- Draw a new title for the game at the top middle of the screen
+- Add a third claw. Mutant crab? WHY NOT?!
+- Make the snacks move diagonally, or zig-zag!
+
+This is just some ideas. I'm sure you've got some cool ones of your own.
+
+Congratulations, you game developer, you!
