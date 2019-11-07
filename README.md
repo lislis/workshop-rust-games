@@ -950,8 +950,6 @@ Now we've got some geometry to do. Let's look at `collides_with`:
 
 If the snack has collided with the point provided, it'll return `true`.
 
-# TODO: AHHHH HOW TO EXPLAIN `norm`
-
 Our completed function will look as follows:
 
 ```
@@ -966,6 +964,16 @@ Our completed function will look as follows:
         false
     }
 ```
+
+`norm`, huh? Why are we using `norm`?
+
+Well, we want to know if the snack so close to the claw, that we can consider it 'caught'. 
+
+For the closenes we can compare the width of the snack to the distance. Is it closer to the claw than the snack itself is wide? Sounds like it was caught to me! 
+
+To get the distance we subtract the location and other vector and get a vector that describes the distance. Since we want to compare it to a single float (width), we need to convert the.distance vector to a float. 
+
+This is what `.norm` is for, it gives a float representation of a vector. (be cautious, it's not the same as `normalize` which gives you a unit vector (a vector with magnitude of 1)).
 
 With that, we're good to go!
 
