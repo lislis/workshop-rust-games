@@ -10,6 +10,12 @@ http://creativecommons.org/licenses/by/3.0/
 
 version cut for brevity
 
+## Introduction
+
+Thank you for participating in our funtimes! The game you're about to code up today will involve a crab. A very. Hungry. Crab.
+
+Each of the claws being assigned to a player, they must cooperate to eat as much algae as they can. However, where there's cooperation lies a little competition, too! The players will see who can collect the most snacks along the way!
+
 ## Table of contents
 
 - [Setting the stage](#setting-the-stage)
@@ -102,13 +108,176 @@ Worthy of note here are three dependencies listed underneath the `dependencies` 
 
 ## Overview
 
-- `main.rs`
-- Explain game module structure
-- `state.rs` declarations
-- `mod.rs` impl of State EventHandler
-- Go into EventHandler (`update`, `draw`, etc.)
-- `config.rs` explanation
-- `assets.rs` explanation
+```
+use ggez::conf;
+use ggez::event;
+use ggez::{ContextBuilder, GameResult};
+
+use std::env;
+use std::path;
+
+mod game;
+use crate::game::{State};
+use crate::game::{SCREEN_W, SCREEN_H};
+
+pub fn main() -> GameResult {
+    let resource_dir = if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
+        let mut path = path::PathBuf::from(manifest_dir);
+        path.push("resources");
+        path
+    } else {
+        path::PathBuf::from("./resources")
+    };
+
+    let (ref mut ctx, ref mut event_loop) =
+        ContextBuilder::new("crab", "lislis & ramonh")
+        .window_setup(conf::WindowSetup::default().title("Crab"))
+        .window_mode(conf::WindowMode::default().dimensions(SCREEN_W, SCREEN_H))
+        .add_resource_path(resource_dir)
+        .build()?;
+
+    let game = &mut State::new(ctx)?;
+    event::run(ctx, event_loop, game)
+}
+```
+
+After setting up the `./resources` folder, where our assets (images, sounds, fonts, etc.) live, we start up the game loop.
+
+We first build a `Context` `ctx` and an `EventLoop` `event_loop` by using [`ContextBuilder`](https://docs.rs/ggez/0.5.1/ggez/struct.ContextBuilder.html), passing to it our Window title, window size (which you can get from `config.rs`, as well as the resources path we declared. This `ContextBuilder` helps to create a `Context` and `EventLoop`.
+
+What are those, however?
+
+Well, a [Context](https://docs.rs/ggez/0.5.1/ggez/struct.Context.html) is the wrapper around all parts of the game. This involves, but isn't limited to:
+
+- Graphics
+- Audio
+- Hardware interaction
+- Event timing
+
+The [Events Loop](https://docs.rs/ggez/0.5.1/ggez/event/struct.EventsLoop.html), on the other hand, can, as described by the maintainers, "be seen more or less as a "context". It provides a way to retrieve events from the software (in our case, the game) and catch events such as input.
+
+In `main.rs` you'll notice we're declaring use of the `game` module. This refers to the contents of the folder `game`. If you're unfamiliar with the concept, [modules can be mapped to a folder in rust](https://doc.rust-lang.org/rust-by-example/mod/split.html), the main contents coming from the contained `mod.rs`.
+
+Looking again at the initialization of the game in `main.rs`, we see the following:
+```
+let game = &mut State::new(ctx)?;
+event::run(ctx, event_loop, game)
+```
+
+Here we're declaring a `new` instance of State, passing to it our newly created context. Having that new state, we can start the game using [event::run](https://docs.rs/ggez/0.5.1/ggez/event/fn.run.html).
+
+Let's take a closer look at that `state.rs`. Right off the bat, we can see its [`struct`](https://doc.rust-lang.org/rust-by-example/custom_types/structs.html):
+
+```
+pub struct State {
+    pub player1: Player,
+    pub player2: Player,
+    pub crab: Crab,
+    pub snacks: Vec<Snack>,
+    pub screen_width: f32,
+    pub assets: Assets
+}
+```
+
+Here we have declarations of each of the players, a crab, a [vector](https://doc.rust-lang.org/rust-by-example/std/vec.html) of snacks, as well as the screen width represented by a floating point number [`f32`](https://doc.rust-lang.org/std/primitive.f32.html) and finally, the set of Assets.
+
+When creating a new State, the following takes place:
+```
+ pub fn new(ctx: &mut Context) -> ggez::GameResult<State> {
+        println!("Play Crab!");
+        println!("Player 1, use WASD!");
+        println!("Player 2, use IJKL!");
+        println!("Have fun!");
+
+        let assets = Assets::new(ctx)?;
+        let (width, height) = ggez::graphics::drawable_size(ctx);
+        let crab_origin = Point2::new(width / 2.0 - (CRAB_W / 2.0),
+                                      height - CRAB_H);
+
+        let s = State {
+            player1: Player::new(crab_origin,
+                                 Vector2::new(CLAW_W - 20., CRAB_H / 2.),
+                                 Vector2::new(-30., -20.))?,
+            player2: Player::new(crab_origin,
+                                 Vector2::new(CRAB_W + 30.0, CRAB_H / 2.),
+                                 Vector2::new(170.0, -20.0))?,
+            crab: Crab::new(crab_origin)?,
+            snacks: spawn_snacks(NUM_SNACKS),
+            screen_width: width,
+            assets: assets
+        };
+        Ok(s)
+    }
+```
+
+Here, we initialize our assets, get our window width and height from the context, and finally pass these along with initialized versions of the ingame moving parts onto our new state. We'll get into the players, crab, snacks and assets a bit later.
+
+In case you are curious, here's a quick glance at the contents of `assets.rs`:
+```
+pub struct Assets {
+    pub crab_image: graphics::Image,
+    pub claw_left: graphics::Image,
+    pub claw_right: graphics::Image,
+    pub bg_image: graphics::Image,
+    pub snack_image: graphics::Image,
+    pub font: graphics::Font,
+    pub bg_sound: audio::Source,
+    pub snap_sound: audio::Source,
+}
+
+impl Assets {
+    pub fn new(ctx: &mut Context) -> GameResult<Assets> {
+        let crab_image = graphics::Image::new(ctx, "/crab.png")?;
+        let claw_left =  graphics::Image::new(ctx, "/claw_left.png")?;
+        let claw_right =  graphics::Image::new(ctx, "/claw_right.png")?;
+        let bg_image =  graphics::Image::new(ctx, "/sand.png")?;
+        let snack_image =  graphics::Image::new(ctx, "/snack.png")?;
+        let font =  graphics::Font::new(ctx, "/Airstream.ttf")?;
+        let bg_sound =  audio::Source::new(ctx, "/Modern-Jazz-Samba-CUT.mp3")?;
+        let snap_sound =  audio::Source::new(ctx, "/woopwoop.mp3")?;
+        Ok(Assets {
+            crab_image,
+            claw_left,
+            claw_right,
+            bg_image,
+            snack_image,
+            font,
+            bg_sound,
+            snap_sound
+        })
+    }
+}
+```
+
+What you can see happening here is we're declaring a `struct` made up of all of the graphics, fonts, and audio that we briefly touched upon earlier and packaging them up for use in our game.
+
+In `mod.rs`, you'll see that we're implementing the `EventHandler` trait for our State struct.
+
+This is the main part of our game. EventHandler provides [main game-related functions](https://docs.rs/ggez/0.5.1/ggez/event/trait.EventHandler.html) that we'll be overriding. These are:
+
+- `update`, called every time there should be a logic update to the game. Some like to think of this as a "tick" in the game, meaning that every time the game is refreshed, the `update` function will be called. This is where all the logic parts of the game will take place, namely updating the positions of actors, checking for collisions, playing audio, and more!
+- `draw`, called every time the actual graphics of the game are refreshed. The norm here is to first clear the graphics in the `context`, and redraw the graphics. If these have had their positions moved in the last `update`, then they will be slightly further away from last time, giving the illusion of movement!
+- `key_up_event`, called every time that a key is handled (in this case, when the key is let go). This is where we'll determine which key was pressed and allow the claws to move!
+
+So that's our `EventHandler` examination, our last bit here will be `config.rs`:
+
+```
+pub const SCREEN_W: f32 = 800.0;
+pub const SCREEN_H: f32 = 600.0;
+
+pub const CRAB_H: f32 = 150.0;
+pub const CRAB_W: f32 = 100.0;
+pub const CRAB_S: f32 = 1.5;
+
+pub const CLAW_W: f32 = 35.0;
+pub const CLAW_H: f32 = 50.0;
+pub const CLAW_S: f32 = 30.0;
+
+pub const SNACK_W: f32 = 40.0;
+pub const NUM_SNACKS: usize = 15;
+```
+
+As you can see, what we're doing here is grouping together constant values that will be used in the game, such as positions, dimensions, as well as the number of snacks that will appear onscreen! When you're well into development, you can come back here and mess around with these values, for sure!
 
 ## Getting started
 
