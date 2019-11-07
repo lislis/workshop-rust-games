@@ -14,6 +14,19 @@ version cut for brevity
 
 - [Setting the stage](#setting-the-stage)
 - [Project Contents](#project-contents)
+- [Dependencies](#dependencies)
+- [Overview](#overview)
+- [Getting Started](#getting-started)
+- [Draw the Background](#draw-the-background)
+- [Implementing the `crab`](#implementing-the-crab)
+- [Implementing the `player`](#implementing-the-player)
+- [Implementing the ~~`player`~~ `claw`](#implementing-the-player-claw)
+- [Implementing the `player` (for realsies this time)](#implementing-the-player-for-realsies-this-time)
+- [Getting the players to move](#getting-the-players-to-move)
+- [Implementing the `snack`s](#implementing-the-snacks)
+- [Scoring points!](#scoring-points)
+- [Final Touches](#final-touches)
+- [What's next?](#whats-next)
 
 ## Setting the stage
 
@@ -258,9 +271,7 @@ You may wonder why it does nothing, right? Well, going back to `crab.rs` and ins
 
 We gotta do the actual drawing!
 
-# YO RAMON LINK TO THE BACKGROUND DRAWING SECTION WHEN YOU"RE DONE
-
-As you may recall from drawing the background graphics, we'll be calling `graphics::draw`
+As you may recall from drawing the [background graphics](#draw-the-background), we'll be calling `graphics::draw`
 
 Our params in this case will be a little more complex, however, as we'll also be scaling the image down (the original is large!):
 
@@ -343,7 +354,7 @@ Let's see here, we've got a `usize` describing the player's score and a...
 A `claw`, eh? Well, if we're going to be concerning ourselves with a claw, let's implement that right away! 
 
 
-## Implementing the ~~`player`~~ `crab`
+## Implementing the ~~`player`~~ `claw`
 
 Well, let's glance at that too, over at `claw.rs`:
 
