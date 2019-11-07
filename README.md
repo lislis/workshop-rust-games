@@ -333,7 +333,7 @@ pub struct Player {
 }
 ```
 
-Let's see here, we've got a `usize` 
+Let's see here, we've got a `usize` describing the player's score and a...
 
 A `claw`, eh? Well, if we're going to be concerning ourselves with a claw, let's implement that right away! 
 
@@ -558,7 +558,7 @@ Give it a quick run and check that it still compiles.
 
 ## Implementing the `player` (for realsies this time)
 
-Next, we'll look at the function for declaring a `new` player:
+Alrighty, back to `player.rs`! Let's look at the function for declaring a `new` player:
 
 ```
     pub fn new(loc: Point2,
@@ -574,7 +574,7 @@ Next, we'll look at the function for declaring a `new` player:
     }
 ```
 
-Great, so to declare a new player, we need to pass to it the location (as you'll see in a bit, that of the crab!), as well as a body and joint pair of anchors. We'll examine those more closely later when we work on our
+Great, so to declare a new player, we need to pass to it the crab's location, a body anchor and a joint anchor. As you saw in the previous section, these will all be used by the player's corresponding claw!
 
 Taking a quick glance back at `state.rs`, we declare not one, but two instances of the `Player` struct (makes sense, this is a 2-player game after all!):
 
@@ -598,4 +598,80 @@ Taking a quick glance back at `state.rs`, we declare not one, but two instances 
         };
 ```
 
-We can see here that we're declaring each player
+In case you were wondering, this is where we determine the respective left and right body and joint anchors for each player's claw.
+
+Cool! Next we'll implement the empty functions. 
+
+First off, let's start with the `increase_score` function:
+
+```
+    pub fn increase_score(&mut self) -> GameResult<&Self> {
+        /*
+        * TODO: Make score go up
+        */
+        Ok(self)
+    }
+```
+
+Every time the player grabs a snack, their score will go up by one. Let's make that happen!
+
+```
+    pub fn increase_score(&mut self) -> GameResult<&Self> {
+        self.score += 1;
+        Ok(self)
+    }
+```
+
+Noice! As for the rest of the functions....
+
+```
+    pub fn update(&mut self, new_loc: Point2) -> GameResult<&Self> {
+        /*
+        * TODO: Update claw
+        */
+        Ok(self)
+    }
+
+    pub fn draw(&self,
+                ctx: &mut Context,
+                img: &graphics::Image) -> GameResult<&Self> {
+        /*
+        * TODO: Draw claw
+        */
+        Ok(self)
+    }
+
+    pub fn movedir(&mut self, dir: Directions) {
+        /*
+        * TODO: Move the claw
+        */
+    }
+```
+
+You might notice, but these functions serve mostly as wrappers around the claw, meaning we can just pass these function calls directly to the player's claw! Let's do that:
+
+```
+    pub fn update(&mut self, new_loc: Point2) -> GameResult<&Self> {
+        self.claw.update(new_loc)?;
+        Ok(self)
+    }
+
+    pub fn draw(&self,
+                ctx: &mut Context,
+                img: &graphics::Image) -> GameResult<&Self> {
+        self.claw.draw(ctx, &img)?;
+        Ok(self)
+    }
+
+    pub fn movedir(&mut self, dir: Directions) {
+        self.claw.movedir(dir);
+    }
+```
+
+Not bad, eh? With that, we've deftly dealt with the player! 
+
+## Getting the players to move.
+
+Now comes the one of the big parts! You see, the game will be controlled by the keyboard. You might've seen already in `state.rs` that this will be done with the `WASD` keys for player 1 and the `IJKL` keys  for player 2, corresponding to up, left, down and right respectively.
+
+
