@@ -29,42 +29,37 @@ impl Snack {
     }
 
     pub fn update(&mut self) -> GameResult<&Self> {
-        self.location += self.velocity;
-        if self.location.y > SCREEN_H {
-            self.active = false;
-        }
-        if !self.active {
-            self.location = Point2::new(rand::random::<f32>() * SCREEN_W,
-                                        -SNACK_W);
-            self.velocity = Vector2::new(0.0,
-                                         rand::random::<f32>() * 2.0 + 0.1);
-            self.active = true;
-        }
+        /*
+        * TODO: 
+        * 1. Move snack down
+        * 2. Set active to false if the snack has left the screen
+        * 3. If not active, reset the snack
+        */
         Ok(self)
     }
 
     pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
-        if self.active {
-            let drawparams = graphics::DrawParam::new()
-                .dest(self.location);
-            graphics::draw(ctx, img, drawparams)?;
-        }
+        /*
+        * TODO: 
+        * Draw the snack, but only if it's active
+        */
         Ok(self)
     }
 
     pub fn collides_with(&mut self, other: Point2) -> bool {
-        if self.active {
-            let distance = self.location - other;
-            if distance.norm() < self.w {
-                self.active = false;
-                return true
-            }
-        }
+        /*
+        * TODO: 
+        * Check whether the snack has collided with something,
+        * providing it's active
+        */
         false
     }
 }
 
 pub fn spawn_snacks(num: usize) -> Vec<Snack> {
-    (0..num).map(|_v| Snack::new()
-                 .expect("Could not create snack")).collect()
+        /*
+        * TODO: 
+        * Generate snacks
+        */
+        vec![]
 }

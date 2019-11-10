@@ -27,17 +27,16 @@ impl EventHandler for State {
         self.player1.update(self.crab.location)?;
         self.player2.update(self.crab.location)?;
         self.collision_check();
-        if !self.assets.bg_sound.playing() {
-            let _ = self.assets.bg_sound.play();
-        }
-
+        /*
+        * TODO: Play the background music
+        */
         Ok(())
     }
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         graphics::clear(ctx, graphics::WHITE);
-        graphics::draw(ctx,
-                       &self.assets.bg_image,
-                       graphics::DrawParam::new().dest(Point2::new(0., 0.)))?;
+        /*
+        * TODO: Draw the background
+        */
         for s in self.snacks.iter() {
             s.draw(ctx, &self.assets.snack_image)?;
         }
@@ -56,35 +55,8 @@ impl EventHandler for State {
         keycode: KeyCode,
         _keymod: KeyMods
     ) {
-        match keycode {
-            KeyCode::W => {
-                self.player1.movedir(Directions::Up);
-            },
-            KeyCode::A => {
-                self.player1.movedir(Directions::Left);
-            },
-            KeyCode::S => {
-                self.player1.movedir(Directions::Down);
-            },
-            KeyCode::D => {
-                self.player1.movedir(Directions::Right);
-            },
-            _ => (),
-        }
-        match keycode {
-            KeyCode::I => {
-                self.player2.movedir(Directions::Up);
-            },
-            KeyCode::J => {
-                self.player2.movedir(Directions::Left);
-            },
-            KeyCode::K => {
-                self.player2.movedir(Directions::Down);
-            },
-            KeyCode::L => {
-                self.player2.movedir(Directions::Right);
-            },
-            _ => (),
-        }
+        /*
+        * TODO: Provide 2 key matches. One for player 1 and the other for player 2
+        */
     }
 }

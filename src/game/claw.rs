@@ -39,51 +39,32 @@ impl Claw {
     }
 
     pub fn update(&mut self, parent_loc: Point2) -> GameResult<&Self> {
-        self.location = parent_loc;
+        /*
+        * TODO: Update claw location according to body's location
+        */
         Ok(self)
     }
 
     pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
-        let b_anchor = self.location + self.body_anchor;
-        let j_anchor = self.location + self.joint_anchor;
-
-        let arm = graphics::Mesh::new_line(ctx,
-                                           &[b_anchor,
-                                             j_anchor],
-                                           10.,
-                                           graphics::Color::new(1.0, 0.0, 0.0, 1.0))?;
-        graphics::draw(ctx, &arm, graphics::DrawParam::default())?;
-
-        let drawparams = graphics::DrawParam::new()
-            .dest(self.get_origin())
-            .rotation(0.0)
-            .scale(Vector2::new(0.2, 0.2));
-        graphics::draw(ctx, img, drawparams)?;
-
+        /*
+        * TODO: 
+        * 1. Draw a pure red line from the body to the claw
+        * 2. Draw the claw image
+        */
         Ok(self)
     }
 
     pub fn get_origin(&self) -> Point2 {
-        let j_anchor = self.location + self.joint_anchor;
-        let claw_origin = Point2::new(j_anchor.x - self.w / 2., j_anchor.y - self.h);
-        claw_origin
+        /*
+        * TODO: return calculated origin point
+        */
+        Point2::new(0., 0.)
     }
 
     pub fn movedir(&mut self, dir:Directions) -> Vector2 {
-        match dir {
-            Directions::Up => {
-                self.joint_anchor.y -= self.s;
-            },
-            Directions::Down => {
-                self.joint_anchor.y += self.s;
-            },
-            Directions::Right => {
-                self.joint_anchor.x += self.s;
-            },
-            Directions::Left => {
-                self.joint_anchor.x -= self.s;
-            }
-        }
-        self.joint_anchor
+        /*
+        * TODO: Change joint anchor according to direction
+        */
+        Vector2::new(0., 0.)
     }
 }
