@@ -618,8 +618,6 @@ First, let's draw the claw image itself from part 2, just like we draw the crab,
         graphics::draw(ctx, img, drawparams)?;
 ```
 
-Once we've done that, try running the game. The crab now has disembodied claws floating around them! A great step, but er...
-
 Next, we'll draw the arm of the crab. This will involve drawing a [`graphics::Mesh::new_line`](https://docs.rs/ggez/0.5.1/ggez/graphics/struct.Mesh.html#method.new_line) from the `body_anchor` to the `joint_anchor`. The function takes four parameters:
 
 - The graphics context
@@ -645,8 +643,6 @@ Once we have this, all we gotta do is draw the arm:
 ```
         graphics::draw(ctx, &arm, graphics::DrawParam::default())?;
 ```
-
-Check it out! You now have a crab with little claws going around. 
 
 Let's take a step back and look at our completed `draw` function:
 
@@ -689,8 +685,6 @@ As you saw when drawing the claw, the claw's `location` attribute is that of the
 ```
 self.location = parent_loc
 ```
-
-Fantastic! If we run this, the claws will now move relative to the crab. Very cool!
 
 One more function to go! This time, we've got the `movedir` function:
 
@@ -739,6 +733,8 @@ In order to move the claw, we need to update its `joint_anchor`. We'll use patte
 ```
 
 Depending on which direction is received by the claw, it'll update the coordinate of its joint accordingly.
+
+If you try running the game and are wondering why the claws aren't showing up, it's because their respective functions are not being called... yet! We'll get to that ever so shortly.
 
 With that done, we've still got a ways to go until we can test this movement, but hey! Quick pat on the back, as you've implemented the claw!
 
