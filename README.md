@@ -2,6 +2,7 @@
 
 RustFest Barcelona 2019
 
+Here's a [HackMD link](https://hackmd.io/9jhiqOm9Q9iSNaaY5GUx6A) you can use for helping each other out!
 
 
 Modern Jazz Samba Kevin MacLeod (incompetech.com)
