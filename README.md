@@ -683,7 +683,7 @@ Let's move onto the `update` function now, which will be considerably quicker:
 As you saw when drawing the claw, the claw's `location` attribute is that of the crab. `parent_loc` in this context refers to the location of the crab, so in order to `update` the claw, we just need to update the `location` attribute:
 
 ```
-self.location = parent_loc
+self.location = parent_loc;
 ```
 
 One more function to go! This time, we've got the `movedir` function:
