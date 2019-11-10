@@ -461,9 +461,9 @@ Done! Now you can run the game and be greeted by our debonaire crab.
 Looking good, crab! But now they've gotta start moving. Let's look at the crab's `update` method, which in turn is called from the `update` method in the event loop, implemented in `mod.rs`:
 
 ```
-    pub fn update(&mut self, parent_loc: Point2) -> GameResult<&Self> {
+    pub fn update(&mut self, max_screen: f32) -> GameResult<&Self> {
         /*
-        * TODO: Update claw location according to body's location
+        * TODO: Move crab left to right
         */
         Ok(self)
     }
