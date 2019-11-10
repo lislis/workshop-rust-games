@@ -108,6 +108,8 @@ Worthy of note here are three dependencies listed underneath the `dependencies` 
 
 ## Overview
 
+Let's begin in the `main.rs`file:
+
 ```
 use ggez::conf;
 use ggez::event;
