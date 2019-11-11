@@ -2,14 +2,18 @@
 
 RustFest Barcelona 2019
 
-Here's a [HackMD link](https://hackmd.io/9jhiqOm9Q9iSNaaY5GUx6A) you can use for helping each other out!
+Running into problems running the game?
+[Workshop attendees compiled a list of helpful tips](https://github.com/lislis/workshop-rust-games/wiki/Installation-and-help)!
 
+Here's the original [HackMD link](https://hackmd.io/9jhiqOm9Q9iSNaaY5GUx6A) for live support (and documentation purposes).
+
+
+**Music credit!**
 
 Modern Jazz Samba Kevin MacLeod (incompetech.com)
 Licensed under Creative Commons: By Attribution 3.0 License
 http://creativecommons.org/licenses/by/3.0/
 
-version cut for brevity
 
 ## Introduction
 
@@ -42,7 +46,7 @@ Make sure you've got [version 1.38.0 or newer of Rust installed before starting]
 Next, we'll check our dependencies. Run the following in the terminal:
 
     $ cargo build
-    
+
 Should you see no errors, then you're all set!
 
 ## Project contents
@@ -457,7 +461,7 @@ Our params in this case will be a little more complex, however, as we'll also be
     }
 ```
 
-Done! Now you can run the game and be greeted by our debonaire crab. 
+Done! Now you can run the game and be greeted by our debonaire crab.
 
 Looking good, crab! But now they've gotta start moving. Let's look at the crab's `update` method, which in turn is called from the `update` method in the event loop, implemented in `mod.rs`:
 
@@ -523,7 +527,7 @@ pub struct Player {
 
 Let's see here, we've got a `usize` describing the player's score and a...
 
-A `claw`, eh? Well, if we're going to be concerning ourselves with a claw, let's implement that right away! 
+A `claw`, eh? Well, if we're going to be concerning ourselves with a claw, let's implement that right away!
 
 
 ## Implementing the ~~`player`~~ `claw`
@@ -600,7 +604,7 @@ Not too shabby! Now that we have this origin we can get to `draw`'ing the claw i
 ```
     pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
         /*
-        * TODO: 
+        * TODO:
         * 1. Draw a pure red line from the body to the claw
         * 2. Draw the claw image
         */
@@ -628,14 +632,14 @@ Next, we'll draw the arm of the crab. This will involve drawing a [`graphics::Me
 Let's first construct our color. It takes a series of `rgba` numbers. We'll need a red color, so we'll assign it accordingly. We'll then need the relative locations of our body and joints respectively, and then we're ready to go:
 
 ```
-        let redColor = graphics::Color::new(1.0, 0.0, 0.0, 1.0);
+        let red_color = graphics::Color::new(1.0, 0.0, 0.0, 1.0);
         let body_location = self.location + self.body_anchor;
         let joint_location = self.location + self.joint_anchor;
         let arm = graphics::Mesh::new_line(ctx,
                                            &[body_location,
                                              joint_location],
                                            10.,
-                                           redColor)?;       
+                                           red_color)?;
 ```
 
 Once we have this, all we gotta do is draw the arm:
@@ -784,7 +788,7 @@ Taking a quick glance back at `state.rs`, we declare not one, but two instances 
 
 In case you were wondering, this is where we determine the respective left and right body and joint anchors for each player's claw.
 
-Cool! Next we'll implement the empty functions. 
+Cool! Next we'll implement the empty functions.
 
 First off, let's start with the `increase_score` function:
 
@@ -852,7 +856,7 @@ You might notice, but these functions serve mostly as wrappers around the claw, 
     }
 ```
 
-Not bad, eh? With that, we've deftly dealt with the player! 
+Not bad, eh? With that, we've deftly dealt with the player!
 
 ## Getting the players to move.
 
@@ -873,7 +877,7 @@ Let's pop over the `mod.rs`, where we'll be taking a look at this function:
     }
 ```
 
-This function will be automatically called up when a player **lifts** up their finger from the keyboard (trust us when we say this makes for a good laugh!) What we'll do here is pattern matching like we did in the previous section to determine which key is being pressed and pass that onto the according player with the appropriate direction. 
+This function will be automatically called up when a player **lifts** up their finger from the keyboard (trust us when we say this makes for a good laugh!) What we'll do here is pattern matching like we did in the previous section to determine which key is being pressed and pass that onto the according player with the appropriate direction.
 
 You'll notice that one of the parameters passed by the function is the `keycode` one. This will let us know which key the player pressed.
 
@@ -897,7 +901,7 @@ Let's try making it happen for player 1:
         }
 ```
 
-Give it a go! You'll notice that player 1 can already start moving. All good, but what about player 2? We **could** add a few more cases for pattern matching against the keycode, but that would mean that there could be times where both players would trigger the event and one of them would be gobbled up, never to be found! 
+Give it a go! You'll notice that player 1 can already start moving. All good, but what about player 2? We **could** add a few more cases for pattern matching against the keycode, but that would mean that there could be times where both players would trigger the event and one of them would be gobbled up, never to be found!
 
 What we'll do instead is add an identical pattern matching set of cases below. The completed function will look like this:
 
@@ -994,7 +998,7 @@ The first function we'll implement is called up by `state.rs` when setting up th
 ```
 pub fn spawn_snacks(num: usize) -> Vec<Snack> {
         /*
-        * TODO: 
+        * TODO:
         * Generate snacks
         */
         vec![]
@@ -1017,7 +1021,7 @@ Next we'll `draw` our snack. This should already be somewhat familiar:
 ```
     pub fn draw(&self, ctx: &mut Context, img: &graphics::Image) -> GameResult<&Self> {
         /*
-        * TODO: 
+        * TODO:
         * Draw the snack, but only if it's active
         */
         Ok(self)
@@ -1034,14 +1038,14 @@ That's right, we gotta draw its image! Big caveat here, though: We'll only be dr
         }
 ```
 
-Looks good so far! We won't be scaling it, as the image is small enough. 
+Looks good so far! We won't be scaling it, as the image is small enough.
 
 Alright, next up we'll take a look at the `update` function:
 
 ```
     pub fn update(&mut self) -> GameResult<&Self> {
         /*
-        * TODO: 
+        * TODO:
         * 1. Move snack down
         * 2. Set active to false if the snack has left the screen
         * 3. If not active, reset the snack
@@ -1101,14 +1105,14 @@ Take a step back and look at the `update` function:
     }
 ```
 
-Looks good! 
+Looks good!
 
 Now we've got some geometry to do. Let's look at `collides_with`:
 
 ```
     pub fn collides_with(&mut self, other: Point2) -> bool {
         /*
-        * TODO: 
+        * TODO:
         * Check whether the snack has collided with something,
         * providing it's active
         */
@@ -1135,17 +1139,17 @@ Our completed function will look as follows:
 
 `norm`, huh? Why are we using `norm`?
 
-Well, we want to know if the snack so close to the claw, that we can consider it 'caught'. 
+Well, we want to know if the snack so close to the claw, that we can consider it 'caught'.
 
-For the closenes we can compare the width of the snack to the distance. Is it closer to the claw than the snack itself is wide? Sounds like it was caught to me! 
+For the closenes we can compare the width of the snack to the distance. Is it closer to the claw than the snack itself is wide? Sounds like it was caught to me!
 
-To get the distance we subtract the location and other vector and get a vector that describes the distance. Since we want to compare it to a single float (width), we need to convert the.distance vector to a float. 
+To get the distance we subtract the location and other vector and get a vector that describes the distance. Since we want to compare it to a single float (width), we need to convert the.distance vector to a float.
 
 This is what `.norm` is for, it gives a float representation of a vector. (be cautious, it's not the same as `normalize` which gives you a unit vector (a vector with magnitude of 1)).
 
 With that, we're good to go!
 
-Why not run the game? You can see the little snackoos falling all over the darn place! 
+Why not run the game? You can see the little snackoos falling all over the darn place!
 
 Nothing happens when your claws touch one though... Hmm, what's next?
 
@@ -1171,7 +1175,7 @@ Alright, we've got our work cut out for us here! First we'll do our loop. Note t
 
 ```
         for s in self.snacks.iter_mut() {
-            
+
         }
 ```
 
@@ -1306,11 +1310,11 @@ With this, we'll have to do some drawing, just like we've done so many times bef
         Ok(self)
     }
  ```
- 
-You'll notice that we'll be drawing each score at the top left and top right corners of the screen, respectively. 
- 
+
+You'll notice that we'll be drawing each score at the top left and top right corners of the screen, respectively.
+
 Given that we're already updating the score when we snag a snack, running the game will already show this and update it accordingly!
- 
+
 Guess what: You are now officially done. 🎉🎉🎉🎉🎉
 
 ## What's next?
